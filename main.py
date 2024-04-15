@@ -20,6 +20,8 @@ class MainWindow(QMainWindow):
         uic.loadUi("ui/main.ui", self)
 
         self.wad_path = None
+        self.texture_size = 128
+        self.texture_spacing = 17
 
         self.show()
 
@@ -29,9 +31,21 @@ class MainWindow(QMainWindow):
         # connections
         self.actionAbout.triggered.connect(lambda: AboutWindow().exec_())
         self.actionOpen.triggered.connect(lambda: self.open_wad())
+        self.actionZoom_In.triggered.connect(lambda: self.adjust_zoom("in"))
+        self.actionZoom_Out.triggered.connect(lambda: self.adjust_zoom("out"))
 
         if not self.wad_path:
             self.setWindowTitle("Untitled - Qt WADitor")
+
+    def adjust_zoom(self, zoom_type):
+        if zoom_type == "in" and self.texture_size < 128:
+            self.texture_size += 16
+        elif zoom_type == "out" and self.texture_size > 16:
+            self.texture_size -= 16
+        else:
+            return
+
+        self.lw_textures.setIconSize(QtCore.QSize(self.texture_size, self.texture_size))
 
     def open_wad(self):
         try:
@@ -49,22 +63,17 @@ class MainWindow(QMainWindow):
         unwadded = unwad(path)
         temp_dir = unwadded[0]
         textures = unwadded[1]
-        texture_size = 128
-        texture_spacing = 16
 
         self.lw_textures.clear()
         for t in textures:
             scaled_pixmap = QtGui.QPixmap(f"{temp_dir}/{t}").scaled(
-                texture_size, texture_size, QtCore.Qt.KeepAspectRatio
+                self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
             )
 
             scaled_icon = QtGui.QIcon(scaled_pixmap)
 
             item = QListWidgetItem(scaled_icon, str(t))
             self.lw_textures.addItem(item)
-
-        self.lw_textures.setIconSize(QtCore.QSize(texture_size, texture_size))
-        self.lw_textures.setSpacing(texture_spacing)
 
     def disable_actions(self, actions):
         self.actionView_Animated.setEnabled(False)
