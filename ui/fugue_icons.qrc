@@ -1,0 +1,26 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>fugue-icons/clipboard-paste-document-text.png</file>
+    <file>fugue-icons/arrow-000-medium.png</file>
+    <file>fugue-icons/arrow-turn-180-left.png</file>
+    <file>fugue-icons/arrow-turn.png</file>
+    <file>fugue-icons/book-question.png</file>
+    <file>fugue-icons/clipboard.png</file>
+    <file>fugue-icons/disk--pencil.png</file>
+    <file>fugue-icons/disk.png</file>
+    <file>fugue-icons/document-copy.png</file>
+    <file>fugue-icons/document-medium.png</file>
+    <file>fugue-icons/document-rename.png</file>
+    <file>fugue-icons/film.png</file>
+    <file>fugue-icons/folder-open.png</file>
+    <file>fugue-icons/image--minus.png</file>
+    <file>fugue-icons/image--plus.png</file>
+    <file>fugue-icons/information-button.png</file>
+    <file>fugue-icons/layer-flip-vertical.png</file>
+    <file>fugue-icons/layer-flip.png</file>
+    <file>fugue-icons/magnifier.png</file>
+    <file>fugue-icons/minus-button.png</file>
+    <file>fugue-icons/scissors-blue.png</file>
+    <file>fugue-icons/ui-panel-resize.png</file>
+  </qresource>
+</RCC>
