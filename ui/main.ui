@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Untitled - Qt WADitor</string>
+   <string>Qt WADitor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="autoFillBackground">
