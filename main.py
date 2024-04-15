@@ -12,8 +12,20 @@ class MainWindow(QMainWindow):
         uic.loadUi("ui/main.ui", self)
         self.show()
 
+        # disabling some actions (for now)
+        self.disable_actions([self.actionView_Animated, self.actionView_Detailed])
+
         # connections
         self.actionAbout.triggered.connect(lambda: AboutWindow().exec_())
+
+    def disable_actions(self, actions):
+        self.actionView_Animated.setEnabled(False)
+        self.actionView_Detailed.setEnabled(False)
+
+        for a in actions:
+            if not a.isEnabled():
+                tooltip = a.toolTip() + " [DISABLED]"
+                a.setToolTip(tooltip)
 
 
 class AboutWindow(QDialog):
