@@ -44,6 +44,9 @@
       <property name="styleSheet">
        <string notr="true">background-color: rgb(171, 171, 171);</string>
       </property>
+      <property name="autoScrollMargin">
+       <number>32</number>
+      </property>
       <property name="selectionMode">
        <enum>QAbstractItemView::ExtendedSelection</enum>
       </property>
@@ -69,7 +72,7 @@
        <enum>QListView::Batched</enum>
       </property>
       <property name="spacing">
-       <number>10</number>
+       <number>64</number>
       </property>
       <property name="viewMode">
        <enum>QListView::IconMode</enum>
