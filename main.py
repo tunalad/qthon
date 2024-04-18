@@ -33,6 +33,9 @@ class MainWindow(QMainWindow):
         self.actionOpen.triggered.connect(lambda: self.open_wad())
         self.actionZoom_In.triggered.connect(lambda: self.adjust_zoom("in"))
         self.actionZoom_Out.triggered.connect(lambda: self.adjust_zoom("out"))
+        self.actionDelete.triggered.connect(lambda: self.delete_textures())
+        self.actionSelect_All.triggered.connect(lambda: self.select_all())
+        self.actionDeselect_All.triggered.connect(lambda: self.deselect_all())
 
         if not self.wad_path:
             self.setWindowTitle("Untitled - Qt WADitor")
@@ -73,6 +76,8 @@ class MainWindow(QMainWindow):
             scaled_icon = QtGui.QIcon(scaled_pixmap)
 
             item = QListWidgetItem(scaled_icon, str(t))
+            item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}")
+            print(QtCore.Qt.UserRole)
             self.lw_textures.addItem(item)
 
     def disable_actions(self, actions):
@@ -83,6 +88,22 @@ class MainWindow(QMainWindow):
             if not a.isEnabled():
                 tooltip = a.toolTip() + " [DISABLED]"
                 a.setToolTip(tooltip)
+
+    def delete_textures(self):
+        print("we deleting stuff")
+        textures = self.lw_textures.selectedItems()
+        for t in textures:
+            self.lw_textures.takeItem(self.lw_textures.row(t))
+            # print(t.text())
+            # print(t.data(QtCore.Qt.UserRole))
+
+    def select_all(self):
+        for i in range(self.lw_textures.count()):
+            self.lw_textures.item(i).setSelected(True)
+
+    def deselect_all(self):
+        for i in range(self.lw_textures.count()):
+            self.lw_textures.item(i).setSelected(False)
 
 
 class AboutWindow(QDialog):

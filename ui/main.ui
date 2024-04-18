@@ -47,6 +47,9 @@
       <property name="autoScrollMargin">
        <number>32</number>
       </property>
+      <property name="dragEnabled">
+       <bool>false</bool>
+      </property>
       <property name="selectionMode">
        <enum>QAbstractItemView::ExtendedSelection</enum>
       </property>
@@ -431,6 +434,9 @@
   <action name="actionDeselect_All">
    <property name="text">
     <string>Select N&amp;one</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>
