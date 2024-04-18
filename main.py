@@ -27,7 +27,44 @@ class MainWindow(QMainWindow):
         self.show()
 
         # disabling some actions (for now)
-        self.disable_actions([self.actionView_Animated, self.actionView_Detailed])
+        self.disable_actions(
+            [
+                # self.action,
+                # FILE
+                self.actionNew,
+                self.actionSave,
+                self.actionSave_As,
+                self.actionImport,
+                self.actionExport,
+                # EDIT
+                self.actionUndo,
+                self.actionRedo,
+                self.actionNew_Item,
+                self.actionLoad,
+                self.menu_Sort_Items,
+                self.actionRename,
+                self.actionResize,
+                # VIEW
+                self.menuToolbar,
+                self.menuSidebar,
+                self.menuStatus_Bar,
+                self.actionPreferences,
+                # HELP
+                self.actionHelp,
+            ]
+        )
+        # removing some actions (for now)
+        self.remove_actions(
+            [
+                self.actionView_Animated,
+                self.actionView_Detailed,
+                # separator in the sidebar
+                next(
+                    (i for i in self.tb_editor.actions() if i.isSeparator()),
+                    None,
+                ),
+            ]
+        )
 
         # connections
         self.actionAbout.triggered.connect(lambda: AboutWindow().exec_())
@@ -84,13 +121,14 @@ class MainWindow(QMainWindow):
             self.lw_textures.addItem(item)
 
     def disable_actions(self, actions):
-        self.actionView_Animated.setEnabled(False)
-        self.actionView_Detailed.setEnabled(False)
-
         for a in actions:
-            if not a.isEnabled():
-                tooltip = a.toolTip() + " [DISABLED]"
-                a.setToolTip(tooltip)
+            tooltip = a.toolTip() + " [DISABLED]"
+            a.setToolTip(tooltip)
+            a.setEnabled(False)
+
+    def remove_actions(self, actions):
+        for a in actions:
+            a.setVisible(False)
 
     def delete_textures(self):
         print("we deleting stuff")
