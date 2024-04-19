@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (
     QListView,
 )
 
+import history
 from wad import unwad
 
 
@@ -23,6 +24,11 @@ class MainWindow(QMainWindow):
         self.wad_path = None
         self.texture_size = 128
         self.texture_spacing = 17
+        self.history = history.History()
+        # state should be followed when:
+        #   we add item(s)
+        #   we remove item(s)
+        #   we rename item(s)
 
         self.show()
 
@@ -37,8 +43,8 @@ class MainWindow(QMainWindow):
                 self.actionImport,
                 self.actionExport,
                 # EDIT
-                self.actionUndo,
-                self.actionRedo,
+                # self.actionUndo,
+                # self.actionRedo,
                 self.actionNew_Item,
                 self.actionLoad,
                 self.menu_Sort_Items,
@@ -77,6 +83,9 @@ class MainWindow(QMainWindow):
         self.actionCopy.triggered.connect(lambda: self.cut_copy_item(is_cut=False))
         self.actionCut.triggered.connect(lambda: self.cut_copy_item(is_cut=True))
         self.actionPaste.triggered.connect(lambda: self.paste_item())
+
+        self.actionUndo.triggered.connect(lambda: self.undo_state())
+        self.actionRedo.triggered.connect(lambda: self.redo_state())
 
         if not self.wad_path:
             self.setWindowTitle("Untitled - Qt WADitor")
@@ -120,6 +129,9 @@ class MainWindow(QMainWindow):
             item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}")
             self.lw_textures.addItem(item)
 
+        # self.history.reset_state()
+        self.history.new_change(self.get_list_state())
+
     def disable_actions(self, actions):
         for a in actions:
             tooltip = a.toolTip() + " [DISABLED]"
@@ -135,8 +147,8 @@ class MainWindow(QMainWindow):
         textures = self.lw_textures.selectedItems()
         for t in textures:
             self.lw_textures.takeItem(self.lw_textures.row(t))
-            # print(t.text())
-            # print(t.data(QtCore.Qt.UserRole))
+
+        self.history.new_change(self.get_list_state())
 
     def select_all(self):
         for i in range(self.lw_textures.count()):
@@ -199,6 +211,47 @@ class MainWindow(QMainWindow):
                     item.setData(QtCore.Qt.UserRole, icon_path)
 
                     self.lw_textures.addItem(item)
+
+        self.history.new_change(self.get_list_state())
+
+    def get_list_state(self):
+        try:
+            textures = self.lw_textures
+            state = []
+            for i in range(textures.count()):
+                item = textures.item(i)
+                state.append(
+                    {"title": item.text(), "path": item.data(QtCore.Qt.UserRole)}
+                )
+            return state
+        except Exception as e:
+            print(f"[get_list_state] {e}")
+
+    def set_list_state(self):
+        try:
+            # clear list
+            self.lw_textures.clear()
+            # append items based on state
+            textures = self.history.state[self.history.position - 1]["list-state"]
+            for t in textures:
+                scaled_pixmap = QtGui.QPixmap(f"{t['path']}").scaled(
+                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
+                )
+
+                scaled_icon = QtGui.QIcon(scaled_pixmap)
+                item = QListWidgetItem(scaled_icon, str(t["title"]))
+
+                self.lw_textures.addItem(item)
+        except Exception as e:
+            print(f"[set_list_state] {e}")
+
+    def undo_state(self):
+        self.history.undo()
+        self.set_list_state()
+
+    def redo_state(self):
+        self.history.redo()
+        self.set_list_state()
 
 
 class AboutWindow(QDialog):
