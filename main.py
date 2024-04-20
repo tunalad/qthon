@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-module-docstring
+# pylint: disable=redefined-outer-name
+# pylint: disable=multiple-imports
+# pylint: disable=missing-class-docstring
+# pylint: disable=broad-exception-caught
+# pylint: disable=too-few-public-methods
 
 import sys, os
 import ui.resource_ui
@@ -10,6 +17,7 @@ from PyQt5.QtWidgets import (
     QListWidgetItem,
     QFileDialog,
     QListView,
+    QMessageBox,
 )
 
 import history
@@ -48,7 +56,7 @@ class MainWindow(QMainWindow):
                 self.actionNew_Item,
                 self.actionLoad,
                 self.menu_Sort_Items,
-                self.actionRename,
+                # self.actionRename,
                 self.actionResize,
                 # VIEW
                 self.menuToolbar,
@@ -83,6 +91,7 @@ class MainWindow(QMainWindow):
         self.actionCopy.triggered.connect(lambda: self.cut_copy_item(is_cut=False))
         self.actionCut.triggered.connect(lambda: self.cut_copy_item(is_cut=True))
         self.actionPaste.triggered.connect(lambda: self.paste_item())
+        self.actionRename.triggered.connect(lambda: self.rename_texture())
 
         self.actionUndo.triggered.connect(lambda: self.undo_state())
         self.actionRedo.triggered.connect(lambda: self.redo_state())
@@ -158,6 +167,38 @@ class MainWindow(QMainWindow):
         for i in range(self.lw_textures.count()):
             self.lw_textures.item(i).setSelected(False)
 
+    def rename_texture(self):
+        selected_items = self.lw_textures.selectedItems()
+
+        if len(selected_items) != 1:
+            print("can't rename 0 or more than 1 files")
+            QMessageBox.warning(
+                self, "QtWADitor Error", "Can't rename multiple or no textures."
+            )
+            return
+
+        item = {
+            "title": selected_items[0].text(),
+            "path": selected_items[0].data(QtCore.Qt.UserRole),
+        }
+
+        rename_win = RenameWindow(item["title"], item["path"])
+
+        if rename_win.exec_():
+            new_name = rename_win.get_new_name()
+            existing_items = self.lw_textures.findItems(
+                new_name, QtCore.Qt.MatchExactly
+            )
+
+            if existing_items and existing_items[0] != selected_items[0]:
+                print("item already exists bucko")
+                QMessageBox.warning(
+                    self, "QtWADitor Error", "Texture with this name already exists."
+                )
+                return
+
+            selected_items[0].setText(new_name)
+
     def cut_copy_item(self, is_cut):
         clipboard = QApplication.clipboard()
         mime_data = QtCore.QMimeData()
@@ -226,6 +267,7 @@ class MainWindow(QMainWindow):
             return state
         except Exception as e:
             print(f"[get_list_state] {e}")
+            return e
 
     def set_list_state(self):
         try:
@@ -258,6 +300,28 @@ class AboutWindow(QDialog):
     def __init__(self):
         super(AboutWindow, self).__init__()
         uic.loadUi("ui/about.ui", self)
+
+
+class RenameWindow(QDialog):
+    def __init__(self, texture_title, texture_path):
+        super(RenameWindow, self).__init__()
+        uic.loadUi("ui/rename.ui", self)
+        # yes, I'd rather create a whole .ui file than code out 2 items widget
+
+        self.title = texture_title
+        self.path = texture_path
+
+        self.lineEdit.setText(self.title)
+
+        self.buttonBox.accepted.connect(lambda: self.ok_clicked())
+        self.buttonBox.rejected.connect(lambda: self.reject())
+
+    def ok_clicked(self):
+        self.new_name = self.lineEdit.text()
+        self.accept()
+
+    def get_new_name(self):
+        return self.new_name
 
 
 if __name__ == "__main__":
