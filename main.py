@@ -6,6 +6,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=broad-exception-caught
 # pylint: disable=too-few-public-methods
+# pylint: disable=unnecessary-lambda
 
 import sys, os
 import ui.resource_ui
@@ -18,6 +19,7 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QListView,
     QMessageBox,
+    QAction,
 )
 
 from RenameWindow import RenameWindow
@@ -36,10 +38,6 @@ class MainWindow(QMainWindow):
         self.texture_size = 128
         self.texture_spacing = 17
         self.history = history.History()
-        # state should be followed when:
-        #   we add item(s)
-        #   we remove item(s)
-        #   we rename item(s)
 
         self.show()
 
@@ -62,9 +60,9 @@ class MainWindow(QMainWindow):
                 # self.actionRename,
                 self.actionResize,
                 # VIEW
-                self.menuToolbar,
-                self.menuSidebar,
-                self.menuStatus_Bar,
+                # self.menuToolbar,
+                # self.menuSidebar,
+                # self.menuStatus_Bar,
                 self.actionPreferences,
                 # HELP
                 self.actionHelp,
@@ -96,11 +94,32 @@ class MainWindow(QMainWindow):
         self.actionPaste.triggered.connect(lambda: self.paste_item())
         self.actionRename.triggered.connect(lambda: self.rename_texture())
 
+        self.bars_manager(self.statusbar, self.actionHide_statusbar)
+        self.bars_manager(
+            self.tb_options, self.actionHide_toolbar, self.actionMovable_toolbar
+        )
+        self.bars_manager(
+            self.tb_editor, self.actionHide_sidebar, self.actionMovable_sidebar
+        )
+
         self.actionUndo.triggered.connect(lambda: self.undo_state())
         self.actionRedo.triggered.connect(lambda: self.redo_state())
 
         if not self.wad_path:
             self.setWindowTitle("Untitled - Qt WADitor")
+
+    def bars_manager(self, widget, action, movable_action=None):
+        if action:
+            widget.setVisible(not action.isChecked())
+            action.triggered.connect(lambda: widget.setVisible(not action.isChecked()))
+        else:
+            print(f"can't find action: {widget.objectName()}")
+
+        if movable_action:
+            movable_action.setChecked(widget.isMovable())
+            movable_action.triggered.connect(
+                lambda: widget.setMovable(movable_action.isChecked())
+            )
 
     def adjust_zoom(self, zoom_type):
         if zoom_type == "in" and self.texture_size < 128:

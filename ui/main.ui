@@ -148,7 +148,6 @@
       <string>&amp;Status Bar</string>
      </property>
      <addaction name="actionHide_statusbar"/>
-     <addaction name="actionMovable_statusbar"/>
     </widget>
     <widget class="QMenu" name="menuSidebar">
      <property name="title">
@@ -158,8 +157,8 @@
      <addaction name="actionMovable_sidebar"/>
     </widget>
     <addaction name="menuToolbar"/>
-    <addaction name="menuStatus_Bar"/>
     <addaction name="menuSidebar"/>
+    <addaction name="menuStatus_Bar"/>
     <addaction name="separator"/>
     <addaction name="actionView_Detailed"/>
     <addaction name="actionView_Animated"/>
@@ -200,7 +199,11 @@
    <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+  </widget>
   <widget class="QToolBar" name="tb_options">
    <property name="windowTitle">
     <string>toolBar</string>
@@ -645,6 +648,9 @@
   <action name="actionHide_statusbar">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Hide</string>
