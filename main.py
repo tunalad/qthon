@@ -201,6 +201,7 @@ class MainWindow(QMainWindow):
                 return
 
             selected_items[0].setText(new_name)
+            self.history.new_change(self.get_list_state())
 
     def cut_copy_item(self, is_cut):
         clipboard = QApplication.clipboard()
