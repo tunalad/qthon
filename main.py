@@ -93,7 +93,13 @@ class MainWindow(QMainWindow):
         self.actionCut.triggered.connect(lambda: self.cut_copy_item(is_cut=True))
         self.actionPaste.triggered.connect(lambda: self.paste_item())
         self.actionRename.triggered.connect(lambda: self.rename_texture())
+        self.actionFlip.triggered.connect(lambda: self.flip_texture(mirror=False))
+        self.actionMirror.triggered.connect(lambda: self.flip_texture(mirror=True))
 
+        self.actionUndo.triggered.connect(lambda: self.undo_state())
+        self.actionRedo.triggered.connect(lambda: self.redo_state())
+
+        # bars toggling
         self.bars_manager(self.statusbar, self.actionHide_statusbar)
         self.bars_manager(
             self.tb_options, self.actionHide_toolbar, self.actionMovable_toolbar
@@ -101,9 +107,6 @@ class MainWindow(QMainWindow):
         self.bars_manager(
             self.tb_editor, self.actionHide_sidebar, self.actionMovable_sidebar
         )
-
-        self.actionUndo.triggered.connect(lambda: self.undo_state())
-        self.actionRedo.triggered.connect(lambda: self.redo_state())
 
         if not self.wad_path:
             self.setWindowTitle("Untitled - Qt WADitor")
@@ -157,7 +160,10 @@ class MainWindow(QMainWindow):
             scaled_icon = QtGui.QIcon(scaled_pixmap)
 
             item = QListWidgetItem(scaled_icon, str(t))
-            item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}")
+            item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}")  # icon path
+            item.setData(QtCore.Qt.UserRole + 1, False)  # is mirrored
+            item.setData(QtCore.Qt.UserRole + 2, False)  # is flipped
+
             self.lw_textures.addItem(item)
 
         # self.history.reset_state()
@@ -180,6 +186,40 @@ class MainWindow(QMainWindow):
             self.lw_textures.takeItem(self.lw_textures.row(t))
 
         self.history.new_change(self.get_list_state())
+
+    def flip_texture(self, mirror=False):
+        selected_items = self.lw_textures.selectedItems()
+
+        if len(selected_items) < 1:
+            print("nothing is selected buckoo")
+            return
+
+        for item in selected_items:
+            icon_path = item.data(QtCore.Qt.UserRole)
+
+            is_flipped = item.data(QtCore.Qt.UserRole + 1)
+            is_mirrored = item.data(QtCore.Qt.UserRole + 2)
+
+            if mirror:  # horizontally (mirrored)
+                is_mirrored = not is_mirrored
+            else:  # vertically (flipped)
+                is_flipped = not is_flipped
+
+            original_pixmap = QtGui.QPixmap(icon_path)
+            scaled_pixmap = original_pixmap.scaled(
+                self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
+            )
+
+            transform = QtGui.QTransform()
+            transform.scale(-1 if is_mirrored else 1, -1 if is_flipped else 1)
+
+            transformed_pixmap = scaled_pixmap.transformed(transform)
+
+            item.setIcon(QtGui.QIcon(transformed_pixmap))
+            item.setData(QtCore.Qt.UserRole + 1, is_flipped)
+            item.setData(QtCore.Qt.UserRole + 2, is_mirrored)
+
+            self.history.new_change(self.get_list_state())
 
     def select_all(self):
         for i in range(self.lw_textures.count()):
@@ -271,8 +311,16 @@ class MainWindow(QMainWindow):
                     )
                     scaled_icon = QtGui.QIcon(scaled_pixmap)
 
+                    init_item = self.lw_textures.item(i)
+
                     item = QListWidgetItem(scaled_icon, texture)
                     item.setData(QtCore.Qt.UserRole, icon_path)
+                    item.setData(
+                        QtCore.Qt.UserRole + 1, init_item.data(QtCore.Qt.UserRole + 1)
+                    )
+                    item.setData(
+                        QtCore.Qt.UserRole + 2, init_item.data(QtCore.Qt.UserRole + 2)
+                    )
 
                     self.lw_textures.addItem(item)
 
@@ -285,8 +333,14 @@ class MainWindow(QMainWindow):
             for i in range(textures.count()):
                 item = textures.item(i)
                 state.append(
-                    {"title": item.text(), "path": item.data(QtCore.Qt.UserRole)}
+                    {
+                        "title": item.text(),
+                        "path": item.data(QtCore.Qt.UserRole),
+                        "is_flipped": item.data(QtCore.Qt.UserRole + 1),
+                        "is_mirrored": item.data(QtCore.Qt.UserRole + 2),
+                    }
                 )
+
             return state
         except Exception as e:
             print(f"[get_list_state] {e}")
@@ -305,6 +359,16 @@ class MainWindow(QMainWindow):
 
                 scaled_icon = QtGui.QIcon(scaled_pixmap)
                 item = QListWidgetItem(scaled_icon, str(t["title"]))
+
+                item.setData(QtCore.Qt.UserRole + 1, t["is_flipped"])
+                item.setData(QtCore.Qt.UserRole + 2, t["is_mirrored"])
+
+                transform = QtGui.QTransform()
+                transform.scale(
+                    -1 if t["is_mirrored"] else 1, -1 if t["is_flipped"] else 1
+                )
+                pixmap = scaled_pixmap.transformed(transform)
+                item.setIcon(QtGui.QIcon(pixmap))
 
                 self.lw_textures.addItem(item)
         except Exception as e:
