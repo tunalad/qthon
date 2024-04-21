@@ -99,6 +99,12 @@ class MainWindow(QMainWindow):
         self.actionUndo.triggered.connect(lambda: self.undo_state())
         self.actionRedo.triggered.connect(lambda: self.redo_state())
 
+        self.lw_textures.itemSelectionChanged.connect(
+            lambda: self.statusbar.showMessage(
+                f'{self.history.state[self.history.position -1]["list-state"][self.lw_textures.currentRow()]}'
+            )
+        )
+
         # bars toggling
         self.bars_manager(self.statusbar, self.actionHide_statusbar)
         self.bars_manager(
@@ -158,8 +164,8 @@ class MainWindow(QMainWindow):
             )
 
             scaled_icon = QtGui.QIcon(scaled_pixmap)
-
             item = QListWidgetItem(scaled_icon, str(t))
+
             item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}")  # icon path
             item.setData(QtCore.Qt.UserRole + 1, False)  # is mirrored
             item.setData(QtCore.Qt.UserRole + 2, False)  # is flipped
@@ -216,10 +222,11 @@ class MainWindow(QMainWindow):
             transformed_pixmap = scaled_pixmap.transformed(transform)
 
             item.setIcon(QtGui.QIcon(transformed_pixmap))
+            item.setData(QtCore.Qt.UserRole, icon_path)
             item.setData(QtCore.Qt.UserRole + 1, is_flipped)
             item.setData(QtCore.Qt.UserRole + 2, is_mirrored)
 
-            self.history.new_change(self.get_list_state())
+        self.history.new_change(self.get_list_state())
 
     def select_all(self):
         for i in range(self.lw_textures.count()):
@@ -358,8 +365,9 @@ class MainWindow(QMainWindow):
                 )
 
                 scaled_icon = QtGui.QIcon(scaled_pixmap)
-                item = QListWidgetItem(scaled_icon, str(t["title"]))
+                item = QListWidgetItem(scaled_icon, t["title"])
 
+                item.setData(QtCore.Qt.UserRole, t["path"])
                 item.setData(QtCore.Qt.UserRole + 1, t["is_flipped"])
                 item.setData(QtCore.Qt.UserRole + 2, t["is_mirrored"])
 
