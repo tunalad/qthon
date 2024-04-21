@@ -8,7 +8,7 @@
 # pylint: disable=too-few-public-methods
 # pylint: disable=unnecessary-lambda
 
-import sys, os
+import sys, os, tempfile
 import ui.resource_ui
 from PyQt5 import uic, QtGui, QtCore
 from PyQt5.QtWidgets import (
@@ -37,6 +37,7 @@ class MainWindow(QMainWindow):
         self.wad_path = None
         self.texture_size = 128
         self.texture_spacing = 17
+        self.temp_dir = None
         self.history = history.History()
 
         self.show()
@@ -49,7 +50,7 @@ class MainWindow(QMainWindow):
                 self.actionNew,
                 self.actionSave,
                 self.actionSave_As,
-                self.actionImport,
+                # self.actionImport,
                 self.actionExport,
                 # EDIT
                 # self.actionUndo,
@@ -83,7 +84,11 @@ class MainWindow(QMainWindow):
 
         # connections
         self.actionAbout.triggered.connect(lambda: AboutWindow().exec_())
+        self.actionQuit.triggered.connect(lambda: self.close())
+
         self.actionOpen.triggered.connect(lambda: self.open_wad())
+        self.actionImport.triggered.connect(lambda: self.import_wad())
+
         self.actionZoom_In.triggered.connect(lambda: self.adjust_zoom("in"))
         self.actionZoom_Out.triggered.connect(lambda: self.adjust_zoom("out"))
         self.actionDelete.triggered.connect(lambda: self.delete_textures())
@@ -142,22 +147,34 @@ class MainWindow(QMainWindow):
 
     def open_wad(self):
         try:
+            self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
+
+            self.wad_path, _ = QFileDialog.getOpenFileName(
+                self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
+            )
+
+            self.lw_textures.clear()
+            self.unpack_wad(self.wad_path)
+            self.setWindowTitle(f"{os.path.basename(self.wad_path)} - Qt WADitor")
+        except Exception as e:
+            print(f"[open_wad] {e}")
+
+    def import_wad(self):
+        try:
             self.wad_path, _ = QFileDialog.getOpenFileName(
                 self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
             )
 
             self.unpack_wad(self.wad_path)
-            self.setWindowTitle(f"{os.path.basename(self.wad_path)} - Qt WADitor")
-
         except Exception as e:
-            print(f"[open_wad] {e}")
+            print(f"[import_wad] {e}")
 
     def unpack_wad(self, path):
-        unwadded = unwad(path)
+        unwadded = unwad(path, self.temp_dir)
         temp_dir = unwadded[0]
         textures = unwadded[1]
 
-        self.lw_textures.clear()
+        __import__("pprint").pprint(unwadded)
         for t in textures:
             scaled_pixmap = QtGui.QPixmap(f"{temp_dir}/{t}").scaled(
                 self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio

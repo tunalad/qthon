@@ -1,4 +1,4 @@
-import os, tempfile, array
+import os, array, sys
 
 from pprint import pprint
 
@@ -8,12 +8,13 @@ from vgio import quake
 from vgio.quake import lmp, wad
 
 
-def unwad(wad_path):
+def unwad(wad_path, temp_dir):
     """
     Extracts contents of a WAD file to PNG files and returns texture names.
 
     Args:
         wad_path (str): Path to the WAD file.
+        temp_dir (str): Path to the TEMP folder, where we extract the textures.
 
     Returns:
         tuple: A tuple containing the path to the temporary directory where contents are extracted
@@ -22,7 +23,6 @@ def unwad(wad_path):
     if not wad.is_wadfile(wad_path):
         raise ValueError(f"Invalid WAD file: {wad_path}")
 
-    temp_dir = tempfile.mkdtemp()
     texture_names = []
 
     # Flatten out palette
@@ -36,8 +36,19 @@ def unwad(wad_path):
             fullpath = os.path.join(temp_dir, filename)
             fullpath_ext = "{0}.png".format(fullpath)
 
+            # Check if duplicate
+            count = 1
+            while os.path.exists(fullpath_ext):
+                # append suffix
+                filename, ext = os.path.splitext(filename)
+                fullpath_ext = f"{os.path.join(temp_dir, filename)} ({count}){ext}"
+                fullpath_ext = "{0}.png".format(fullpath_ext)  # Update fullpath_ext
+                count += 1
+
+            print(fullpath_ext)
+
             # Add texture name to the list
-            texture_names.append(filename)
+            texture_names.append(os.path.splitext(os.path.basename(fullpath_ext))[0])
 
             data = None
             size = None

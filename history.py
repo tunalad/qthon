@@ -78,4 +78,5 @@ class History:
             print(f"[History.redo] {e}")
 
     def print_state(self):
+        return
         pprint(self.state[self.position - 1])
