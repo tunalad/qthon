@@ -10,6 +10,7 @@
 
 import sys, os, tempfile
 import ui.resource_ui
+from shutil import rmtree
 from PyQt5 import uic, QtGui, QtCore
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -37,8 +38,10 @@ class MainWindow(QMainWindow):
         self.wad_path = None
         self.texture_size = 128
         self.texture_spacing = 17
-        self.temp_dir = None
         self.history = history.History()
+        self.temp_dir = None
+
+        self.new_wad()
 
         self.show()
 
@@ -47,7 +50,7 @@ class MainWindow(QMainWindow):
             [
                 # self.action,
                 # FILE
-                self.actionNew,
+                # self.actionNew,
                 self.actionSave,
                 self.actionSave_As,
                 # self.actionImport,
@@ -88,6 +91,7 @@ class MainWindow(QMainWindow):
 
         self.actionOpen.triggered.connect(lambda: self.open_wad())
         self.actionImport.triggered.connect(lambda: self.import_wad())
+        self.actionNew.triggered.connect(lambda: self.new_wad())
 
         self.actionZoom_In.triggered.connect(lambda: self.adjust_zoom("in"))
         self.actionZoom_Out.triggered.connect(lambda: self.adjust_zoom("out"))
@@ -122,6 +126,14 @@ class MainWindow(QMainWindow):
         if not self.wad_path:
             self.setWindowTitle("Untitled - Qt WADitor")
 
+    def closeEvent(self, event):
+        try:
+            rmtree(self.temp_dir)
+        except Exception as e:
+            print(f"[closeEvent] {e}")
+        finally:
+            event.accept()
+
     def bars_manager(self, widget, action, movable_action=None):
         if action:
             widget.setVisible(not action.isChecked())
@@ -145,13 +157,31 @@ class MainWindow(QMainWindow):
 
         self.lw_textures.setIconSize(QtCore.QSize(self.texture_size, self.texture_size))
 
-    def open_wad(self):
+    def new_wad(self):
         try:
+            if self.temp_dir:
+                rmtree(self.temp_dir)
+                self.lw_textures.clear()
+
             self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
 
+            self.setWindowTitle(f"Untitled - Qt WADitor")
+        except Exception as e:
+            print(f"[new_wad] {e}")
+
+    def open_wad(self):
+        try:
             self.wad_path, _ = QFileDialog.getOpenFileName(
                 self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
             )
+
+            if not self.wad_path:
+                return
+
+            if self.temp_dir:
+                rmtree(self.temp_dir)
+
+            self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
 
             self.lw_textures.clear()
             self.unpack_wad(self.wad_path)
@@ -165,7 +195,8 @@ class MainWindow(QMainWindow):
                 self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
             )
 
-            self.unpack_wad(self.wad_path)
+            if self.wad_path:
+                self.unpack_wad(self.wad_path)
         except Exception as e:
             print(f"[import_wad] {e}")
 
