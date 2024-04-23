@@ -325,10 +325,19 @@ class MainWindow(QMainWindow):
                 texture_paths = texture_paths.data().decode("utf-8").split("\n")
                 textures_list = mime_data.text().split("\n")
 
-                # Create list items and add them to the list widget
+                existing_textures = [item["title"] for item in self.get_list_state()]
+
+                # create list items and add them to the list widget
                 for i in range(len(texture_paths)):
                     texture = textures_list[i]
                     icon_path = texture_paths[i]
+
+                    if texture in existing_textures:
+                        count = 1
+                        # slap suffix
+                        while f"{texture} ({count})" in existing_textures:
+                            count += 1
+                        texture = f"{texture} ({count})"
 
                     scaled_pixmap = QtGui.QPixmap(icon_path).scaled(
                         self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
