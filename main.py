@@ -10,7 +10,7 @@
 
 import sys, os, tempfile
 import ui.resource_ui
-from shutil import rmtree
+from shutil import rmtree, copyfile
 from PyQt5 import uic, QtGui, QtCore
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -214,7 +214,7 @@ class MainWindow(QMainWindow):
             scaled_icon = QtGui.QIcon(scaled_pixmap)
             item = QListWidgetItem(scaled_icon, str(t))
 
-            item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}")  # icon path
+            item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}.png")  # icon path
             item.setData(QtCore.Qt.UserRole + 1, False)  # is mirrored
             item.setData(QtCore.Qt.UserRole + 2, False)  # is flipped
 
@@ -327,11 +327,15 @@ class MainWindow(QMainWindow):
         selected_items = self.lw_textures.selectedItems()
         textures_list = []
         texture_paths = []
+        flip_list = []
+        mirror_list = []
 
         # extract data from items
         for item in selected_items:
             textures_list.append(item.text())
             texture_paths.append(item.data(QtCore.Qt.UserRole))
+            flip_list.append(item.data(QtCore.Qt.UserRole + 1))
+            mirror_list.append(item.data(QtCore.Qt.UserRole + 2))
             if is_cut:
                 self.lw_textures.takeItem(self.lw_textures.row(item))
 
@@ -340,6 +344,13 @@ class MainWindow(QMainWindow):
         mime_data.setText(text)
 
         mime_data.setData("texture_paths", bytes("\n".join(texture_paths), "utf-8"))
+        mime_data.setData(
+            "flip_list", bytes("\n".join(str(flip) for flip in flip_list), "utf-8")
+        )
+        mime_data.setData(
+            "mirror_list",
+            bytes("\n".join(str(mirror) for mirror in mirror_list), "utf-8"),
+        )
 
         # finally, put that thing to clipboard
         clipboard.setMimeData(mime_data)
@@ -351,10 +362,14 @@ class MainWindow(QMainWindow):
         if mime_data.hasText():
             texture = mime_data.text()
             texture_paths = mime_data.data("texture_paths")
+            flip_list = mime_data.data("flip_list")
+            mirror_list = mime_data.data("mirror_list")
 
             if texture_paths:
                 texture_paths = texture_paths.data().decode("utf-8").split("\n")
                 textures_list = mime_data.text().split("\n")
+                flip_list = flip_list.data().decode("utf-8").split("\n")
+                mirror_list = mirror_list.data().decode("utf-8").split("\n")
 
                 existing_textures = [item["title"] for item in self.get_list_state()]
 
@@ -362,6 +377,7 @@ class MainWindow(QMainWindow):
                 for i in range(len(texture_paths)):
                     texture = textures_list[i]
                     icon_path = texture_paths[i]
+                    original_path = icon_path
 
                     if texture in existing_textures:
                         count = 1
@@ -369,22 +385,36 @@ class MainWindow(QMainWindow):
                         while f"{texture} ({count})" in existing_textures:
                             count += 1
                         texture = f"{texture} ({count})"
+                        # to the file name too
+                        icon_path, ext = os.path.splitext(icon_path)
+                        icon_path = f"{icon_path} ({count}){ext}"
 
-                    scaled_pixmap = QtGui.QPixmap(icon_path).scaled(
+                    # copy the actual file to the new path
+                    copy_path = os.path.join(
+                        self.temp_dir, f"{os.path.basename(icon_path)}"
+                    )
+
+                    copyfile(original_path, copy_path)
+
+                    # create the item
+                    scaled_pixmap = QtGui.QPixmap(copy_path).scaled(
                         self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                     )
                     scaled_icon = QtGui.QIcon(scaled_pixmap)
 
-                    init_item = self.lw_textures.item(i)
-
                     item = QListWidgetItem(scaled_icon, texture)
-                    item.setData(QtCore.Qt.UserRole, icon_path)
-                    item.setData(
-                        QtCore.Qt.UserRole + 1, init_item.data(QtCore.Qt.UserRole + 1)
+                    item.setData(QtCore.Qt.UserRole, copy_path)
+                    item.setData(QtCore.Qt.UserRole + 1, flip_list[i] == "True")
+                    item.setData(QtCore.Qt.UserRole + 2, mirror_list[i] == "True")
+
+                    # apply the mirroring
+                    transform = QtGui.QTransform()
+                    transform.scale(
+                        -1 if mirror_list[i] == "True" else 1,
+                        -1 if flip_list[i] == "True" else 1,
                     )
-                    item.setData(
-                        QtCore.Qt.UserRole + 2, init_item.data(QtCore.Qt.UserRole + 2)
-                    )
+                    pixmap = scaled_pixmap.transformed(transform)
+                    item.setIcon(QtGui.QIcon(pixmap))
 
                     self.lw_textures.addItem(item)
 
