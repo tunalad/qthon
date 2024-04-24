@@ -164,6 +164,7 @@ class MainWindow(QMainWindow):
                 self.lw_textures.clear()
 
             self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
+            self.history.set_temp_dir(self.temp_dir)
 
             self.setWindowTitle(f"Untitled - Qt WADitor")
         except Exception as e:
@@ -182,6 +183,7 @@ class MainWindow(QMainWindow):
                 rmtree(self.temp_dir)
 
             self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
+            self.history.set_temp_dir(self.temp_dir)
 
             self.lw_textures.clear()
             self.unpack_wad(self.wad_path)
@@ -205,7 +207,6 @@ class MainWindow(QMainWindow):
         temp_dir = unwadded[0]
         textures = unwadded[1]
 
-        __import__("pprint").pprint(unwadded)
         for t in textures:
             scaled_pixmap = QtGui.QPixmap(f"{temp_dir}/{t}").scaled(
                 self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
@@ -444,6 +445,9 @@ class MainWindow(QMainWindow):
         try:
             # clear list
             self.lw_textures.clear()
+            self.history.load_snapshot(
+                str(self.history.state[self.history.position - 1]["time"])
+            )
             # append items based on state
             textures = self.history.state[self.history.position - 1]["list-state"]
             for t in textures:
