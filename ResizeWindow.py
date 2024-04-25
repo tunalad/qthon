@@ -16,6 +16,9 @@ class ResizeWindow(QDialog):
         self.sb_X.setValue(self.x)
         self.sb_Y.setValue(self.y)
 
+        self.sb_X.lineEdit().setReadOnly(True)
+        self.sb_Y.lineEdit().setReadOnly(True)
+
         self.sb_X.valueChanged.connect(lambda: self.spinbox_constrain())
         self.sb_Y.valueChanged.connect(lambda: self.spinbox_constrain())
 

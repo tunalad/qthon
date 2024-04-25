@@ -41,6 +41,9 @@
         <property name="buttonSymbols">
          <enum>QAbstractSpinBox::PlusMinus</enum>
         </property>
+        <property name="keyboardTracking">
+         <bool>false</bool>
+        </property>
         <property name="minimum">
          <number>16</number>
         </property>
@@ -72,6 +75,9 @@
        <widget class="QSpinBox" name="sb_Y">
         <property name="buttonSymbols">
          <enum>QAbstractSpinBox::PlusMinus</enum>
+        </property>
+        <property name="keyboardTracking">
+         <bool>false</bool>
         </property>
         <property name="minimum">
          <number>16</number>
