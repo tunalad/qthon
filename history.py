@@ -12,7 +12,7 @@ class History:
     def __init__(self):
         super().__init__()
         self.temp_dir = None
-        self.state = [{"time": int(time()), "list-state": []}]
+        self.state = [{"time": time(), "list-state": []}]
         self.position = 1
 
     def set_temp_dir(self, temp_dir):
@@ -27,7 +27,7 @@ class History:
         resets state to the default, empty, state
         """
         # no exceptions for this cuz there's no way this errors out somehow xddd
-        self.state = [{"time": int(time()), "list-state": []}]
+        self.state = [{"time": time(), "list-state": []}]
         self.position = 1
 
     def new_change(self, new_state):
@@ -35,7 +35,7 @@ class History:
         when we make a change, we call this function and pass an array of the new state
         """
         try:
-            current_time = int(time())
+            current_time = time()
 
             if len(self.state) != self.position:
                 # clear any future if exists
