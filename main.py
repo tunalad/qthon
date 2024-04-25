@@ -24,6 +24,7 @@ from PyQt5.QtWidgets import (
 )
 
 from RenameWindow import RenameWindow
+from ResizeWindow import ResizeWindow
 from AboutWindow import AboutWindow
 
 import history
@@ -62,7 +63,7 @@ class MainWindow(QMainWindow):
                 self.actionLoad,
                 self.menu_Sort_Items,
                 # self.actionRename,
-                self.actionResize,
+                # self.actionResize,
                 # VIEW
                 # self.menuToolbar,
                 # self.menuSidebar,
@@ -102,6 +103,7 @@ class MainWindow(QMainWindow):
         self.actionCut.triggered.connect(lambda: self.cut_copy_item(is_cut=True))
         self.actionPaste.triggered.connect(lambda: self.paste_item())
         self.actionRename.triggered.connect(lambda: self.rename_texture())
+        self.actionResize.triggered.connect(lambda: self.resize_texture())
         self.actionFlip.triggered.connect(lambda: self.flip_texture(mirror=False))
         self.actionMirror.triggered.connect(lambda: self.flip_texture(mirror=True))
 
@@ -324,6 +326,27 @@ class MainWindow(QMainWindow):
                 QtCore.Qt.UserRole, f"{self.temp_dir}/{new_name}.png"
             )
             self.history.new_change(self.get_list_state())
+
+    def resize_texture(self):
+        selected_items = self.lw_textures.selectedItems()
+        textures = []
+
+        if len(selected_items) < 1:
+            print("can't resize 0 files")
+            QMessageBox.warning(
+                self, "QtWADitor Error", "No textures selected for resizing"
+            )
+            return
+
+        for i in selected_items:
+            textures.append({"title": i.text(), "path": i.data(QtCore.Qt.UserRole)})
+
+        resize_win = ResizeWindow(textures)
+
+        if resize_win.exec_():
+            print("do sth post texture(s) resizing idk")
+            self.history.new_change(self.get_list_state())
+            self.set_list_state()
 
     def cut_copy_item(self, is_cut):
         clipboard = QApplication.clipboard()
