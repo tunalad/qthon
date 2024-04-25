@@ -165,6 +165,7 @@ class MainWindow(QMainWindow):
 
             self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
             self.history.set_temp_dir(self.temp_dir)
+            self.history.new_change(self.get_list_state())  # empty snap
 
             self.setWindowTitle(f"Untitled - Qt WADitor")
         except Exception as e:
@@ -239,6 +240,7 @@ class MainWindow(QMainWindow):
         textures = self.lw_textures.selectedItems()
         for t in textures:
             self.lw_textures.takeItem(self.lw_textures.row(t))
+            os.remove(t.data(QtCore.Qt.UserRole))
 
         self.history.new_change(self.get_list_state())
 
@@ -315,7 +317,12 @@ class MainWindow(QMainWindow):
                 )
                 return
 
+            os.rename(item["path"], f"{self.temp_dir}/{new_name}.png")
+
             selected_items[0].setText(new_name)
+            selected_items[0].setData(
+                QtCore.Qt.UserRole, f"{self.temp_dir}/{new_name}.png"
+            )
             self.history.new_change(self.get_list_state())
 
     def cut_copy_item(self, is_cut):
@@ -334,11 +341,18 @@ class MainWindow(QMainWindow):
         # extract data from items
         for item in selected_items:
             textures_list.append(item.text())
-            texture_paths.append(item.data(QtCore.Qt.UserRole))
+            # texture_paths.append(item.data(QtCore.Qt.UserRole))
+            texture_paths.append(
+                f"{self.temp_dir}/snapshots/{(self.history.state[self.history.position - 1]['time'])}/{item.text()}.png"
+            )
             flip_list.append(item.data(QtCore.Qt.UserRole + 1))
             mirror_list.append(item.data(QtCore.Qt.UserRole + 2))
             if is_cut:
                 self.lw_textures.takeItem(self.lw_textures.row(item))
+                print(
+                    f"{self.temp_dir}/snapshots/{(self.history.state[self.history.position - 1]['time'])}/{item.text()}.png"
+                )
+                os.remove(item.data(QtCore.Qt.UserRole))
 
         # make MIME item (for clipboard)
         text = "\n".join(textures_list)
@@ -355,6 +369,9 @@ class MainWindow(QMainWindow):
 
         # finally, put that thing to clipboard
         clipboard.setMimeData(mime_data)
+
+        if is_cut:
+            self.history.new_change(self.get_list_state())
 
     def paste_item(self):
         clipboard = QApplication.clipboard()
