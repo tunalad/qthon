@@ -73,18 +73,6 @@ class MainWindow(QMainWindow):
                 self.actionHelp,
             ]
         )
-        # removing some actions (for now)
-        self.remove_actions(
-            [
-                self.actionView_Animated,
-                # self.actionView_Detailed,
-                # separator in the sidebar
-                # next(
-                #    (i for i in self.tb_editor.actions() if i.isSeparator()),
-                #    None,
-                # ),
-            ]
-        )
 
         # connections
         self.actionAbout.triggered.connect(lambda: AboutWindow().exec_())
@@ -114,6 +102,7 @@ class MainWindow(QMainWindow):
         self.actionSave_As.triggered.connect(lambda: self.save_wad(save_as=True))
 
         self.actionView_Detailed.triggered.connect(lambda: self.preview_texture())
+        self.actionView_Animated.triggered.connect(lambda: self.preview_texture(True))
 
         self.lw_textures.itemSelectionChanged.connect(
             lambda: self.statusbar.showMessage(
@@ -164,7 +153,7 @@ class MainWindow(QMainWindow):
 
         self.lw_textures.setIconSize(QtCore.QSize(self.texture_size, self.texture_size))
 
-    def preview_texture(self):
+    def preview_texture(self, animation=False):
         selected_items = self.lw_textures.selectedItems()
 
         if len(selected_items) != 1:
@@ -178,8 +167,12 @@ class MainWindow(QMainWindow):
             "title": selected_items[0].text(),
             "path": selected_items[0].data(QtCore.Qt.UserRole),
         }
-
-        PreviewWindow(item["path"], 3).exec_()
+        if os.path.basename(item["path"]).startswith("*") and animation:
+            QMessageBox.warning(
+                self, "QtWADitor Error", "No water animations implemented yet :("
+            )
+        else:
+            PreviewWindow(item["path"], 3, animation).exec_()
 
     def new_wad(self):
         try:
