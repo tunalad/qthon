@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import (
 from RenameWindow import RenameWindow
 from ResizeWindow import ResizeWindow
 from AboutWindow import AboutWindow
+from PreviewWindow import PreviewWindow
 
 import history
 from wad import unwad, wadup
@@ -55,7 +56,6 @@ class MainWindow(QMainWindow):
                 # self.actionSave,
                 # self.actionSave_As,
                 # self.actionImport,
-                self.actionExport,
                 # EDIT
                 # self.actionUndo,
                 # self.actionRedo,
@@ -77,12 +77,12 @@ class MainWindow(QMainWindow):
         self.remove_actions(
             [
                 self.actionView_Animated,
-                self.actionView_Detailed,
+                # self.actionView_Detailed,
                 # separator in the sidebar
-                next(
-                    (i for i in self.tb_editor.actions() if i.isSeparator()),
-                    None,
-                ),
+                # next(
+                #    (i for i in self.tb_editor.actions() if i.isSeparator()),
+                #    None,
+                # ),
             ]
         )
 
@@ -112,6 +112,8 @@ class MainWindow(QMainWindow):
 
         self.actionSave.triggered.connect(lambda: self.save_wad())
         self.actionSave_As.triggered.connect(lambda: self.save_wad(save_as=True))
+
+        self.actionView_Detailed.triggered.connect(lambda: self.preview_texture())
 
         self.lw_textures.itemSelectionChanged.connect(
             lambda: self.statusbar.showMessage(
@@ -161,6 +163,23 @@ class MainWindow(QMainWindow):
             return
 
         self.lw_textures.setIconSize(QtCore.QSize(self.texture_size, self.texture_size))
+
+    def preview_texture(self):
+        selected_items = self.lw_textures.selectedItems()
+
+        if len(selected_items) != 1:
+            print("can't preview 0 or more than 1 textures")
+            QMessageBox.warning(
+                self, "QtWADitor Error", "Can't preview multiple or no textures."
+            )
+            return
+
+        item = {
+            "title": selected_items[0].text(),
+            "path": selected_items[0].data(QtCore.Qt.UserRole),
+        }
+
+        PreviewWindow(item["path"], 3).exec_()
 
     def new_wad(self):
         try:
