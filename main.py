@@ -28,7 +28,7 @@ from ResizeWindow import ResizeWindow
 from AboutWindow import AboutWindow
 
 import history
-from wad import unwad
+from wad import unwad, wadup
 
 
 class MainWindow(QMainWindow):
@@ -52,8 +52,8 @@ class MainWindow(QMainWindow):
                 # self.action,
                 # FILE
                 # self.actionNew,
-                self.actionSave,
-                self.actionSave_As,
+                # self.actionSave,
+                # self.actionSave_As,
                 # self.actionImport,
                 self.actionExport,
                 # EDIT
@@ -109,6 +109,9 @@ class MainWindow(QMainWindow):
 
         self.actionUndo.triggered.connect(lambda: self.undo_state())
         self.actionRedo.triggered.connect(lambda: self.redo_state())
+
+        self.actionSave.triggered.connect(lambda: self.save_wad())
+        self.actionSave_As.triggered.connect(lambda: self.save_wad(save_as=True))
 
         self.lw_textures.itemSelectionChanged.connect(
             lambda: self.statusbar.showMessage(
@@ -196,14 +199,27 @@ class MainWindow(QMainWindow):
 
     def import_wad(self):
         try:
-            self.wad_path, _ = QFileDialog.getOpenFileName(
+            wad_path, _ = QFileDialog.getOpenFileName(
                 self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
             )
 
-            if self.wad_path:
-                self.unpack_wad(self.wad_path)
+            if wad_path:
+                self.unpack_wad(wad_path)
         except Exception as e:
             print(f"[import_wad] {e}")
+
+    def save_wad(self, save_as=False):
+        try:
+            if not self.wad_path or save_as:
+                self.wad_path, _ = QFileDialog.getSaveFileName(
+                    self, "Save WAD file", "", "WAD Files (*.wad);;All Files (*)"
+                )
+
+            if self.wad_path:
+                wadup(self.temp_dir, self.wad_path)
+
+        except Exception as e:
+            print(f"[save_wad] {e}")
 
     def unpack_wad(self, path):
         unwadded = unwad(path, self.temp_dir)
