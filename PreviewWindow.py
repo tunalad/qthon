@@ -2,7 +2,7 @@ import os, sys
 
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QMessageBox
 from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 from PIL import Image
 
 
@@ -10,7 +10,7 @@ class PreviewWindow(QDialog):
     def __init__(self, texture, scale=1, animated=False):
         super().__init__()
         self.setWindowTitle("Preview texture - QtWADitor")
-
+        self.setMinimumSize(500, 300)
         layout = QVBoxLayout()
 
         filename = os.path.basename(texture)
@@ -21,6 +21,7 @@ class PreviewWindow(QDialog):
             self.frames = self.load_animation_frames(texture, scale)
 
             self.animation_label = QLabel()
+            self.animation_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
             layout.addWidget(self.animation_label)
 
             self.timer = QTimer(self)
@@ -31,6 +32,7 @@ class PreviewWindow(QDialog):
             mipmaps = self.generate_mipmaps(texture, scale)
             for mipmap_texture in mipmaps:
                 mipmap_label = QLabel()
+                mipmap_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
                 mipmap_label.setPixmap(mipmap_texture)
                 layout.addWidget(mipmap_label)
 

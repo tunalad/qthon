@@ -51,30 +51,19 @@ class MainWindow(QMainWindow):
         self.disable_actions(
             [
                 # self.action,
-                # FILE
-                # self.actionNew,
-                # self.actionSave,
-                # self.actionSave_As,
-                # self.actionImport,
                 # EDIT
-                # self.actionUndo,
-                # self.actionRedo,
                 self.actionNew_Item,
                 self.actionLoad,
                 self.menu_Sort_Items,
-                # self.actionRename,
-                # self.actionResize,
                 # VIEW
-                # self.menuToolbar,
-                # self.menuSidebar,
-                # self.menuStatus_Bar,
                 self.actionPreferences,
                 # HELP
                 self.actionHelp,
             ]
         )
 
-        # connections
+        # CONNECTIONS
+        ## trigger
         self.actionAbout.triggered.connect(lambda: AboutWindow().exec_())
         self.actionQuit.triggered.connect(lambda: self.close())
 
@@ -104,13 +93,47 @@ class MainWindow(QMainWindow):
         self.actionView_Detailed.triggered.connect(lambda: self.preview_texture())
         self.actionView_Animated.triggered.connect(lambda: self.preview_texture(True))
 
+        ## item selection
+        # statusbar preview
         self.lw_textures.itemSelectionChanged.connect(
             lambda: self.statusbar.showMessage(
                 f'{self.history.state[self.history.position -1]["list-state"][self.lw_textures.currentRow()]}'
             )
         )
 
-        # bars toggling
+        # togglable items when we selected EXACTLY 1 item
+        togglable_actions = [self.actionRename, self.actionResize]
+        self.disable_actions(togglable_actions, False)
+        self.lw_textures.itemSelectionChanged.connect(
+            lambda: (
+                [action.setEnabled(True) for action in togglable_actions]
+                if len(self.lw_textures.selectedItems()) == 1
+                else self.disable_actions(togglable_actions, True)
+            )
+        )
+
+        # togglable items when we selected LESS than 1 item
+        togglable_actions_lto = [
+            self.actionMirror,
+            self.actionFlip,
+            self.actionCut,
+            self.actionCopy,
+            self.actionDelete,
+        ]
+        self.disable_actions(togglable_actions_lto, False)
+        self.lw_textures.itemSelectionChanged.connect(
+            lambda: (
+                [action.setEnabled(True) for action in togglable_actions]
+                if len(self.lw_textures.selectedItems()) < 1
+                else self.disable_actions(togglable_actions, True)
+            )
+        )
+
+        # disable detailed & animation preview
+        self.disable_previews()
+        self.lw_textures.itemSelectionChanged.connect(lambda: self.disable_previews())
+
+        # TOGGLING BARS
         self.bars_manager(self.statusbar, self.actionHide_statusbar)
         self.bars_manager(
             self.tb_options, self.actionHide_toolbar, self.actionMovable_toolbar
@@ -255,15 +278,33 @@ class MainWindow(QMainWindow):
         # self.history.reset_state()
         self.history.new_change(self.get_list_state())
 
-    def disable_actions(self, actions):
+    def disable_actions(self, actions, not_implemented=True):
         for a in actions:
-            tooltip = a.toolTip() + " [DISABLED]"
+            tooltip = a.toolTip()
+
+            if not_implemented:
+                tooltip += " [NOT IMPLEMENTED]"
+
             a.setToolTip(tooltip)
             a.setEnabled(False)
 
-    def remove_actions(self, actions):
-        for a in actions:
-            a.setVisible(False)
+    def disable_previews(self):
+        selected_items = self.lw_textures.selectedItems()
+
+        # disable detailed
+        if len(selected_items) != 1:
+            self.actionView_Detailed.setEnabled(False)
+        else:
+            self.actionView_Detailed.setEnabled(True)
+
+        # disable animation
+        if len(selected_items) != 1 or not (
+            selected_items[0].text().startswith("+")
+            or selected_items[0].text().startswith("*")
+        ):
+            self.actionView_Animated.setEnabled(False)
+        else:
+            self.actionView_Animated.setEnabled(True)
 
     def delete_textures(self):
         print("we deleting stuff")
