@@ -67,6 +67,8 @@ class PreviewWindow(QDialog):
 
         # find other frames
         animation_paths = []
+
+        animation_paths.append(texture_path)
         for filename in os.listdir(temp_dir):
             if (
                 len(filename) == len(frames_name)
@@ -85,9 +87,7 @@ class PreviewWindow(QDialog):
         # load them & scale
         for frame_path in animation_paths:
             img = Image.open(frame_path)
-            resized_image = img.resize(
-                (img.width * scale // 2, img.height * scale // 2)
-            )
+            resized_image = img.resize((img.width * scale, img.height * scale))
             resized_image = resized_image.convert("RGBA")
             qimage = QImage(
                 resized_image.tobytes(),
