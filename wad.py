@@ -148,6 +148,19 @@ def wadup(in_path, out_path):
                     print(f"Error processing {file_name}: {e}")
 
 
+def flip_texture(texture_path, mirror=False):
+    img = Image.open(texture_path)
+
+    if mirror: 
+        flipped = img.transpose(Image.FLIP_LEFT_RIGHT)
+    else:
+        flipped = img.transpose(Image.FLIP_TOP_BOTTOM)
+    
+    flipped.save(texture_path)
+
+    flipped.close()
+    img.close()
+
 def main():
     # unwaded = unwad("catacomb.wad")
     # pprint(unwaded)

@@ -29,7 +29,7 @@ from AboutWindow import AboutWindow
 from PreviewWindow import PreviewWindow
 
 import history
-from wad import unwad, wadup
+from wad import unwad, wadup, flip_texture
 
 
 class MainWindow(QMainWindow):
@@ -74,8 +74,8 @@ class MainWindow(QMainWindow):
         self.actionZoom_In.triggered.connect(lambda: self.adjust_zoom("in"))
         self.actionZoom_Out.triggered.connect(lambda: self.adjust_zoom("out"))
         self.actionDelete.triggered.connect(lambda: self.delete_textures())
-        self.actionSelect_All.triggered.connect(lambda: self.select_all())
-        self.actionDeselect_All.triggered.connect(lambda: self.deselect_all())
+        self.actionSelect_All.triggered.connect(lambda: self.de_select_all(True))
+        self.actionDeselect_All.triggered.connect(lambda: self.de_select_all(False))
         self.actionCopy.triggered.connect(lambda: self.cut_copy_item(is_cut=False))
         self.actionCut.triggered.connect(lambda: self.cut_copy_item(is_cut=True))
         self.actionPaste.triggered.connect(lambda: self.paste_item())
@@ -84,8 +84,8 @@ class MainWindow(QMainWindow):
         self.actionFlip.triggered.connect(lambda: self.flip_texture(mirror=False))
         self.actionMirror.triggered.connect(lambda: self.flip_texture(mirror=True))
 
-        self.actionUndo.triggered.connect(lambda: self.undo_state())
-        self.actionRedo.triggered.connect(lambda: self.redo_state())
+        self.actionUndo.triggered.connect(lambda: self.undo_redo(False))
+        self.actionRedo.triggered.connect(lambda: self.undo_redo(True))
 
         self.actionSave.triggered.connect(lambda: self.save_wad())
         self.actionSave_As.triggered.connect(lambda: self.save_wad(save_as=True))
@@ -114,8 +114,8 @@ class MainWindow(QMainWindow):
 
         # togglable items when we selected LESS than 1 item
         togglable_actions_lto = [
-            self.actionMirror,
-            self.actionFlip,
+            #self.actionMirror,
+            #self.actionFlip,
             self.actionCut,
             self.actionCopy,
             self.actionDelete,
@@ -125,7 +125,7 @@ class MainWindow(QMainWindow):
             lambda: (
                 [action.setEnabled(True) for action in togglable_actions]
                 if len(self.lw_textures.selectedItems()) < 1
-                else self.disable_actions(togglable_actions, True)
+                else self.disable_actions(togglable_actions, False)
             )
         )
 
@@ -270,12 +270,9 @@ class MainWindow(QMainWindow):
             item = QListWidgetItem(scaled_icon, str(t))
 
             item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}.png")  # icon path
-            item.setData(QtCore.Qt.UserRole + 1, False)  # is mirrored
-            item.setData(QtCore.Qt.UserRole + 2, False)  # is flipped
 
             self.lw_textures.addItem(item)
 
-        # self.history.reset_state()
         self.history.new_change(self.get_list_state())
 
     def disable_actions(self, actions, not_implemented=True):
@@ -325,38 +322,27 @@ class MainWindow(QMainWindow):
         for item in selected_items:
             icon_path = item.data(QtCore.Qt.UserRole)
 
-            is_flipped = item.data(QtCore.Qt.UserRole + 1)
-            is_mirrored = item.data(QtCore.Qt.UserRole + 2)
-
             if mirror:  # horizontally (mirrored)
-                is_mirrored = not is_mirrored
+                flip_texture(icon_path, True)
             else:  # vertically (flipped)
-                is_flipped = not is_flipped
+                flip_texture(icon_path, False)
 
             original_pixmap = QtGui.QPixmap(icon_path)
             scaled_pixmap = original_pixmap.scaled(
                 self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
             )
 
-            transform = QtGui.QTransform()
-            transform.scale(-1 if is_mirrored else 1, -1 if is_flipped else 1)
-
-            transformed_pixmap = scaled_pixmap.transformed(transform)
-
-            item.setIcon(QtGui.QIcon(transformed_pixmap))
+            item.setIcon(QtGui.QIcon(scaled_pixmap))
             item.setData(QtCore.Qt.UserRole, icon_path)
-            item.setData(QtCore.Qt.UserRole + 1, is_flipped)
-            item.setData(QtCore.Qt.UserRole + 2, is_mirrored)
 
         self.history.new_change(self.get_list_state())
 
-    def select_all(self):
-        for i in range(self.lw_textures.count()):
-            self.lw_textures.item(i).setSelected(True)
-
-    def deselect_all(self):
-        for i in range(self.lw_textures.count()):
-            self.lw_textures.item(i).setSelected(False)
+    def de_select_all(self, toggle):
+        try:
+            for i in range(self.lw_textures.count()):
+                self.lw_textures.item(i).setSelected(toggle)
+        except Exception as e:
+            print(f"[de_select_all] {e}")
 
     def rename_texture(self):
         selected_items = self.lw_textures.selectedItems()
@@ -540,8 +526,6 @@ class MainWindow(QMainWindow):
                     {
                         "title": item.text(),
                         "path": item.data(QtCore.Qt.UserRole),
-                        "is_flipped": item.data(QtCore.Qt.UserRole + 1),
-                        "is_mirrored": item.data(QtCore.Qt.UserRole + 2),
                     }
                 )
 
@@ -568,27 +552,22 @@ class MainWindow(QMainWindow):
                 item = QListWidgetItem(scaled_icon, t["title"])
 
                 item.setData(QtCore.Qt.UserRole, t["path"])
-                item.setData(QtCore.Qt.UserRole + 1, t["is_flipped"])
-                item.setData(QtCore.Qt.UserRole + 2, t["is_mirrored"])
-
-                transform = QtGui.QTransform()
-                transform.scale(
-                    -1 if t["is_mirrored"] else 1, -1 if t["is_flipped"] else 1
-                )
-                pixmap = scaled_pixmap.transformed(transform)
-                item.setIcon(QtGui.QIcon(pixmap))
+                item.setIcon(QtGui.QIcon(scaled_pixmap))
 
                 self.lw_textures.addItem(item)
         except Exception as e:
             print(f"[set_list_state] {e}")
 
-    def undo_state(self):
-        self.history.undo()
-        self.set_list_state()
+    def undo_redo(self, redo=False):
+        try:
+            if redo:
+                self.history.redo()
+            else:
+                self.history.undo()
 
-    def redo_state(self):
-        self.history.redo()
-        self.set_list_state()
+            self.set_list_state()
+        except Exception as e:
+            print(f"[undo_redo] {e}")
 
 
 if __name__ == "__main__":
