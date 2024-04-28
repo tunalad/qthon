@@ -47,6 +47,22 @@ class MainWindow(QMainWindow):
 
         self.show()
 
+        # togglable items when we selected EXACTLY 1 item
+        togglable_actions = [self.actionRename, self.actionResize]
+
+        # togglable items when we selected LESS than 1 item
+        togglable_actions_lto = [
+            self.actionMirror,
+            self.actionFlip,
+            self.actionCut,
+            self.actionCopy,
+            self.actionDelete,
+        ]
+
+        # first, we disable them
+        self.disable_actions(togglable_actions)
+        self.disable_actions(togglable_actions_lto)
+
         # disabling some actions (for now)
         self.disable_actions(
             [
@@ -94,42 +110,24 @@ class MainWindow(QMainWindow):
         self.actionView_Animated.triggered.connect(lambda: self.preview_texture(True))
 
         ## item selection
-        # statusbar preview
+        ### statusbar preview
         self.lw_textures.itemSelectionChanged.connect(
             lambda: self.statusbar.showMessage(
                 f'{self.history.state[self.history.position -1]["list-state"][self.lw_textures.currentRow()]}'
             )
         )
 
-        # togglable items when we selected EXACTLY 1 item
-        togglable_actions = [self.actionRename, self.actionResize]
-        self.disable_actions(togglable_actions, False)
+        ### togglable items when we selected EXACTLY 1 item
         self.lw_textures.itemSelectionChanged.connect(
-            lambda: (
-                [action.setEnabled(True) for action in togglable_actions]
-                if len(self.lw_textures.selectedItems()) == 1
-                else self.disable_actions(togglable_actions, True)
-            )
+            lambda: self.active_on_selection(togglable_actions, False)
         )
 
-        # togglable items when we selected LESS than 1 item
-        togglable_actions_lto = [
-            #self.actionMirror,
-            #self.actionFlip,
-            self.actionCut,
-            self.actionCopy,
-            self.actionDelete,
-        ]
-        self.disable_actions(togglable_actions_lto, False)
+        ### togglable items when we selected LESS than 1 item
         self.lw_textures.itemSelectionChanged.connect(
-            lambda: (
-                [action.setEnabled(True) for action in togglable_actions]
-                if len(self.lw_textures.selectedItems()) < 1
-                else self.disable_actions(togglable_actions, False)
-            )
+            lambda: self.active_on_selection(togglable_actions_lto, True)
         )
 
-        # disable detailed & animation preview
+        ### disable detailed & animation preview
         self.disable_previews()
         self.lw_textures.itemSelectionChanged.connect(lambda: self.disable_previews())
 
@@ -141,6 +139,8 @@ class MainWindow(QMainWindow):
         self.bars_manager(
             self.tb_editor, self.actionHide_sidebar, self.actionMovable_sidebar
         )
+
+        # WINDOW TITLE
 
         if not self.wad_path:
             self.setWindowTitle("Untitled - Qt WADitor")
@@ -568,6 +568,15 @@ class MainWindow(QMainWindow):
             self.set_list_state()
         except Exception as e:
             print(f"[undo_redo] {e}")
+
+    def active_on_selection(self, actions, multi=False):
+        for a in actions:
+            if not multi and len(self.lw_textures.selectedItems()) == 1:
+                a.setEnabled(True)
+            elif multi and len(self.lw_textures.selectedItems()) > 0:
+                a.setEnabled(True)
+            else:
+                a.setEnabled(False)
 
 
 if __name__ == "__main__":
