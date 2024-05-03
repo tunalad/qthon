@@ -46,7 +46,7 @@ p, li { white-space: pre-wrap; }
           <enum>Qt::RichText</enum>
          </property>
          <property name="alignment">
-          <set>Qt::AlignHCenter|Qt::AlignTop</set>
+          <set>Qt::AlignCenter</set>
          </property>
          <property name="openExternalLinks">
           <bool>true</bool>
@@ -80,7 +80,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="openLinks">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -103,6 +103,9 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Aliquam dictum, enim eu aliquet semper, lacus metus sagittis dolor, et auctor sem elit id mi. Vestibulum lobortis tempus sem vel pulvinar. Integer iaculis at magna sit amet facilisis. Praesent sit amet sapien ac diam commodo accumsan varius ac quam. Proin sollicitudin, est a venenatis malesuada, dolor urna consectetur sem, consectetur tempor lectus nunc ut enim. Curabitur vel dui nisi. Phasellus id cursus nunc, eu cursus ante. Aliquam consectetur lacinia enim sit amet egestas. &lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Quisque nec venenatis risus. Nam sapien sem, vehicula vitae nibh non, lobortis pellentesque justo. Morbi vulputate ullamcorper malesuada. Fusce faucibus, erat eget lacinia placerat, neque lorem pretium augue, nec semper odio sapien in est. Duis laoreet urna vel mattis pulvinar. Ut eu luctus odio. Mauris ut orci at nulla bibendum faucibus. &lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vivamus nec mi volutpat, vulputate nisi vel, maximus nibh. Suspendisse fermentum leo nec tempor eleifend. Praesent consequat dolor a leo eleifend, non fringilla purus lacinia. Aenean id molestie ante. Aliquam in vehicula erat. Fusce id tristique nunc, et mattis tellus. Etiam porttitor elit et ante pellentesque auctor. Nulla et sapien porta leo pretium gravida a a mi. Nulla vel mollis dui. Sed tincidunt pharetra risus, nec ultricies dui cursus id. Lorem ipsum dolor sit amet, consectetur adipiscing elit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="openExternalLinks">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

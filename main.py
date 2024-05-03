@@ -146,7 +146,6 @@ class MainWindow(QMainWindow):
         )
 
         # WINDOW TITLE
-
         if not self.wad_path:
             self.setWindowTitle("Untitled - Qt WADitor")
 
@@ -172,7 +171,7 @@ class MainWindow(QMainWindow):
                     lambda: widget.setMovable(movable_action.isChecked())
                 )
         except Exception as e:
-            print("[bars_manager] {e}")
+            print(f"[bars_manager] {e}")
 
     def adjust_zoom(self, zoom_type):
         try:
@@ -185,7 +184,7 @@ class MainWindow(QMainWindow):
 
             self.lw_textures.setIconSize(QtCore.QSize(self.texture_size, self.texture_size))
         except Exception as e:
-            print("[adjust_zoom] {e}")
+            print(f"[adjust_zoom] {e}")
 
     def preview_texture(self, animation=False):
         try:
@@ -209,7 +208,7 @@ class MainWindow(QMainWindow):
             else:
                 PreviewWindow(item["path"], 3, animation).exec_()
         except Exception as e:
-            print("[preview_texture] {e}")
+            print(f"[preview_texture] {e}")
 
     def new_wad(self):
         try:
@@ -290,7 +289,7 @@ class MainWindow(QMainWindow):
 
             self.history.new_change(self.get_list_state())
         except Exception as e:
-            print("[unpack_wad] {e}")
+            print(f"[unpack_wad] {e}")
 
     def disable_actions(self, actions, not_implemented=True):
         try:
@@ -303,7 +302,7 @@ class MainWindow(QMainWindow):
                 a.setToolTip(tooltip)
                 a.setEnabled(False)
         except Exception as e:
-            print("[disable_actions] {e}")
+            print(f"[disable_actions] {e}")
 
     def disable_previews(self):
         try:
@@ -324,7 +323,7 @@ class MainWindow(QMainWindow):
             else:
                 self.actionView_Animated.setEnabled(True)
         except Exception as e:
-            print("[disable_previews] {e}")
+            print(f"[disable_previews] {e}")
 
     def delete_textures(self):
         try:
@@ -336,7 +335,7 @@ class MainWindow(QMainWindow):
 
             self.history.new_change(self.get_list_state())
         except Exception as e:
-            print("[delete_textures] {e}")
+            print(f"[delete_textures] {e}")
 
     def flip_texture(self, mirror=False):
         try:
@@ -364,7 +363,7 @@ class MainWindow(QMainWindow):
 
             self.history.new_change(self.get_list_state())
         except Exception as e:
-            print("[flip_texture] {e}")
+            print(f"[flip_texture] {e}")
 
     def de_select_all(self, toggle):
         try:
@@ -412,7 +411,7 @@ class MainWindow(QMainWindow):
                 )
                 self.history.new_change(self.get_list_state())
         except Exception as e:
-            print("[rename_texture] {e}")
+            print(f"[rename_texture] {e}")
 
     def resize_texture(self):
         try:
@@ -436,7 +435,7 @@ class MainWindow(QMainWindow):
                 self.history.new_change(self.get_list_state())
                 self.set_list_state()
         except Exception as e:
-            print("[resize_texture] {e}")
+            print(f"[resize_texture] {e}")
 
     def cut_copy_item(self, is_cut):
         try:
@@ -487,7 +486,7 @@ class MainWindow(QMainWindow):
             if is_cut:
                 self.history.new_change(self.get_list_state())
         except Exception as e:
-            print("[copy_item] {e}")
+            print(f"[copy_item] {e}")
 
     def paste_item(self):
         try:
@@ -555,7 +554,7 @@ class MainWindow(QMainWindow):
 
             self.history.new_change(self.get_list_state())
         except Exception as e:
-            print("[paste_item] {e}")
+            print(f"[paste_item] {e}")
 
     def get_list_state(self):
         try:
@@ -620,7 +619,7 @@ class MainWindow(QMainWindow):
                 else:
                     a.setEnabled(False)
         except Exception as e:
-            print("[active_on_selection] {e}")
+            print(f"[active_on_selection] {e}")
 
 
 if __name__ == "__main__":

@@ -27,6 +27,8 @@ class PreviewWindow(QDialog):
             self.timer = QTimer(self)
             self.timer.timeout.connect(self.update_frame)
             self.timer.start(250)  # animation speed
+        elif filename.startswith("*") and animated:
+            pass
         else:
             # mipmap
             mipmaps = self.generate_mipmaps(texture, scale)
