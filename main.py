@@ -42,6 +42,7 @@ class MainWindow(QMainWindow):
         self.texture_spacing = 17
         self.history = history.History()
         self.temp_dir = None
+        self.save_pos = None
 
         self.new_wad()
 
@@ -145,9 +146,18 @@ class MainWindow(QMainWindow):
             self.tb_editor, self.actionHide_sidebar, self.actionMovable_sidebar
         )
 
-        # WINDOW TITLE
-        if not self.wad_path:
-            self.setWindowTitle("Untitled - Qt WADitor")
+        self.title_management()
+        self.history.position_callback = self.title_management
+
+    @property
+    def save_pos(self):
+        """The save_pos property."""
+        return self._save_pos
+
+    @save_pos.setter
+    def save_pos(self, value):
+        self._save_pos = value
+        self.title_management()
 
     def closeEvent(self, event):
         try:
@@ -156,6 +166,17 @@ class MainWindow(QMainWindow):
             print(f"[closeEvent] {e}")
         finally:
             event.accept()
+
+    def title_management(self):
+        try:
+            if not self.wad_path:
+                self.setWindowTitle("Untitled* - QtWADitor")
+            elif self.wad_path and (self.save_pos != self.history.position):
+                self.setWindowTitle(f"{os.path.basename(self.wad_path)}* - QtWADitor")
+            else:
+                self.setWindowTitle(f"{os.path.basename(self.wad_path)} - QtWADitor")
+        except Exception as e:
+            print(f"[title_management] {e}")
 
     def bars_manager(self, widget, action, movable_action=None):
         try:
@@ -220,7 +241,7 @@ class MainWindow(QMainWindow):
             self.history.set_temp_dir(self.temp_dir)
             self.history.new_change(self.get_list_state())  # empty snap
 
-            self.setWindowTitle(f"Untitled - Qt WADitor")
+            self.wad_path = None
         except Exception as e:
             print(f"[new_wad] {e}")
 
@@ -238,10 +259,11 @@ class MainWindow(QMainWindow):
 
             self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
             self.history.set_temp_dir(self.temp_dir)
+            self.history.reset_state()
 
             self.lw_textures.clear()
             self.unpack_wad(self.wad_path)
-            self.setWindowTitle(f"{os.path.basename(self.wad_path)} - Qt WADitor")
+            self.save_pos = self.history.position
         except Exception as e:
             print(f"[open_wad] {e}")
 
@@ -265,6 +287,7 @@ class MainWindow(QMainWindow):
 
             if self.wad_path:
                 wadup(self.temp_dir, self.wad_path)
+                self.save_pos = self.history.position
 
         except Exception as e:
             print(f"[save_wad] {e}")

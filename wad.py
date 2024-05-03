@@ -47,7 +47,7 @@ def unwad(wad_path, temp_dir):
                 fullpath_ext = "{0}.png".format(fullpath_ext)  # Update fullpath_ext
                 count += 1
 
-            print(fullpath_ext)
+            #print(fullpath_ext)
 
             # Add texture name to the list
             texture_names.append(os.path.splitext(os.path.basename(fullpath_ext))[0])

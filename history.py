@@ -13,7 +13,18 @@ class History:
         super().__init__()
         self.temp_dir = None
         self.state = [{"time": time(), "list-state": []}]
+        self.position_callback = None
         self.position = 1
+
+    @property
+    def position(self):
+        """The position property."""
+        return self._position
+    @position.setter
+    def position(self, value):
+        self._position = value
+        if self.position_callback:
+            self.position_callback()
 
     def set_temp_dir(self, temp_dir):
         self.temp_dir = temp_dir
@@ -116,7 +127,7 @@ class History:
                     dest_path = os.path.join(snap_dir, filename)
                     # Copy the file to the snapshot directory
                     shutil.copy(file_path, dest_path)
-            print(f"Snapshot '{snap_name}' made")
+            #print(f"Snapshot '{snap_name}' made")
         except Exception as e:
             print(f"[History/take_snapshot] {e}")
 
@@ -130,7 +141,7 @@ class History:
 
             snap_dir = os.path.join(self.SNAPSHOTS, snap_name)
             if not os.path.exists(snap_dir):
-                print(f"Snapshot '{snap_name}' does not exist")
+                #print(f"Snapshot '{snap_name}' does not exist")
                 return
 
             # remove shyt (except the snaps dir)
@@ -146,6 +157,6 @@ class History:
                 dest_path = os.path.join(self.temp_dir, filename)
                 shutil.copy(src_path, dest_path)
 
-            print(f"Snapshot '{snap_name}' loaded")
+            #print(f"Snapshot '{snap_name}' loaded")
         except Exception as e:
             print(f"[History/load_snapshot] {e}")
