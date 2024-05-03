@@ -29,7 +29,7 @@ from AboutWindow import AboutWindow
 from PreviewWindow import PreviewWindow
 
 import history
-from wad import unwad, wadup, flip_texture
+from wad import unwad, wadup, flip_texture, import_texture
 
 
 class MainWindow(QMainWindow):
@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
             [
                 # self.action,
                 # EDIT
-                self.actionNew_Item,
+                #self.actionNew_Item,
                 self.actionLoad,
                 self.menu_Sort_Items,
                 # VIEW
@@ -92,6 +92,7 @@ class MainWindow(QMainWindow):
         self.actionOpen.triggered.connect(lambda: self.open_wad())
         self.actionImport.triggered.connect(lambda: self.import_wad())
         self.actionNew.triggered.connect(lambda: self.new_wad())
+        self.actionNew_Item.triggered.connect(lambda: self.import_image())
 
         self.actionZoom_In.triggered.connect(lambda: self.adjust_zoom("in"))
         self.actionZoom_Out.triggered.connect(lambda: self.adjust_zoom("out"))
@@ -146,7 +147,6 @@ class MainWindow(QMainWindow):
             self.tb_editor, self.actionHide_sidebar, self.actionMovable_sidebar
         )
 
-        self.title_management()
         self.history.position_callback = self.title_management
 
     @property
@@ -313,6 +313,31 @@ class MainWindow(QMainWindow):
             self.history.new_change(self.get_list_state())
         except Exception as e:
             print(f"[unpack_wad] {e}")
+
+    def import_image(self):
+        try:
+            images, _ = QFileDialog.getOpenFileNames(
+                self, "Select image(s)", "", "Images (*.png *.jpg *.jpeg);;All Files (*)"
+            )
+
+            textures = import_texture(images, self.temp_dir)
+            #__import__('pprint').pprint(imported_textures)
+            for t in textures:
+                scaled_pixmap = QtGui.QPixmap(t).scaled(
+                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
+                )
+
+                scaled_icon = QtGui.QIcon(scaled_pixmap)
+                item = QListWidgetItem(scaled_icon, os.path.splitext(os.path.basename(t))[0])
+
+                item.setData(QtCore.Qt.UserRole, t)  # icon path
+
+                self.lw_textures.addItem(item)
+            self.history.new_change(self.get_list_state())
+            print(self.get_list_state())
+        except Exception as e:
+            print(f"[import_image] {e}")
+        pass
 
     def disable_actions(self, actions, not_implemented=True):
         try:

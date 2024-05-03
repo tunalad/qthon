@@ -161,6 +161,42 @@ def flip_texture(texture_path, mirror=False):
     flipped.close()
     img.close()
 
+
+def import_texture(images, temp_dir):
+    new_paths = []
+    for i in images:
+        img = Image.open(i)
+        x, y = img.size
+
+        # make sure we can divide the size by 16
+        if x % 16 == 0 and y % 16 == 0 and max(x, y) <= 512:
+            new_width, new_height = x, y
+        else:
+            # use the closest sizes dividable by 16
+            new_width = (x // 16) * 16
+            new_height = (y // 16) * 16
+
+            # max size 512
+            if max(new_width, new_height) > 512:
+                ratio = 512 / max(new_width, new_height)
+                new_width = int(new_width * ratio)
+                new_height = int(new_height * ratio)
+
+            # resize if needed
+            if x != new_width or y != new_height:
+                img = img.resize((new_width, new_height))
+
+        img = img.convert("RGB")
+        base_name = os.path.splitext(os.path.basename(i))[0]
+
+        new_path = f"{temp_dir}/{base_name}.png"
+        img.save(new_path, format="PNG")
+        img.close()
+        new_paths.append(new_path)
+    return new_paths
+
+
+
 def main():
     # unwaded = unwad("catacomb.wad")
     # pprint(unwaded)
