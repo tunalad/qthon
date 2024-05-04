@@ -54,8 +54,6 @@ class MainWindow(QMainWindow):
             [
                 # self.action,
                 # EDIT
-                #self.actionNew_Item,
-                self.actionLoad,
                 self.menu_Sort_Items,
                 # VIEW
                 self.actionPreferences,

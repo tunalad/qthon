@@ -12,7 +12,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>321</width>
+    <width>391</width>
     <height>321</height>
    </size>
   </property>
@@ -187,7 +187,6 @@
     <addaction name="actionDeselect_All"/>
     <addaction name="separator"/>
     <addaction name="actionNew_Item"/>
-    <addaction name="actionLoad"/>
     <addaction name="menu_Sort_Items"/>
     <addaction name="separator"/>
     <addaction name="actionRename"/>
@@ -502,14 +501,6 @@
     <bool>false</bool>
    </property>
   </action>
-  <action name="actionLoad">
-   <property name="text">
-    <string>&amp;Load</string>
-   </property>
-   <property name="iconVisibleInMenu">
-    <bool>false</bool>
-   </property>
-  </action>
   <action name="actionDelete">
    <property name="icon">
     <iconset resource="fugue_icons.qrc">
@@ -553,6 +544,9 @@
    </property>
    <property name="text">
     <string>Resi&amp;ze</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>
