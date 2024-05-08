@@ -9,7 +9,7 @@ from PIL import Image
 class PreviewWindow(QDialog):
     def __init__(self, texture, scale=1, animated=False):
         super().__init__()
-        self.setWindowTitle("Preview texture - QtWADitor")
+        self.setWindowTitle("Preview texture - Qthon")
         self.setMinimumSize(500, 300)
         layout = QVBoxLayout()
 

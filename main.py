@@ -168,11 +168,11 @@ class MainWindow(QMainWindow):
     def title_management(self):
         try:
             if not self.wad_path:
-                self.setWindowTitle("Untitled* - QtWADitor")
+                self.setWindowTitle("Untitled* - Qthon")
             elif self.wad_path and (self.save_pos != self.history.position):
-                self.setWindowTitle(f"{os.path.basename(self.wad_path)}* - QtWADitor")
+                self.setWindowTitle(f"{os.path.basename(self.wad_path)}* - Qthon")
             else:
-                self.setWindowTitle(f"{os.path.basename(self.wad_path)} - QtWADitor")
+                self.setWindowTitle(f"{os.path.basename(self.wad_path)} - Qthon")
         except Exception as e:
             print(f"[title_management] {e}")
 
@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
             if len(selected_items) != 1:
                 print("can't preview 0 or more than 1 textures")
                 QMessageBox.warning(
-                    self, "QtWADitor Error", "Can't preview multiple or no textures."
+                    self, "Qthon Error", "Can't preview multiple or no textures."
                 )
                 return
 
@@ -222,7 +222,7 @@ class MainWindow(QMainWindow):
             }
             if os.path.basename(item["path"]).startswith("*") and animation:
                 QMessageBox.warning(
-                    self, "QtWADitor Error", "No water animations implemented yet :("
+                    self, "Qthon Error", "No water animations implemented yet :("
                 )
             else:
                 PreviewWindow(item["path"], 3, animation).exec_()
@@ -425,7 +425,7 @@ class MainWindow(QMainWindow):
             if len(selected_items) != 1:
                 print("can't rename 0 or more than 1 files")
                 QMessageBox.warning(
-                    self, "QtWADitor Error", "Can't rename multiple or no textures."
+                    self, "Qthon Error", "Can't rename multiple or no textures."
                 )
                 return
 
@@ -445,7 +445,7 @@ class MainWindow(QMainWindow):
                 if existing_items and existing_items[0] != selected_items[0]:
                     print("item already exists bucko")
                     QMessageBox.warning(
-                        self, "QtWADitor Error", "Texture with this name already exists."
+                        self, "Qthon Error", "Texture with this name already exists."
                     )
                     return
 
@@ -467,7 +467,7 @@ class MainWindow(QMainWindow):
             if len(selected_items) < 1:
                 print("can't resize 0 files")
                 QMessageBox.warning(
-                    self, "QtWADitor Error", "No textures selected for resizing"
+                    self, "Qthon Error", "No textures selected for resizing"
                 )
                 return
 
