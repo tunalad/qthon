@@ -238,7 +238,7 @@ class MainWindow(QMainWindow):
                     self, "Qthon Error", "No water animations implemented yet :("
                 )
             else:
-                PreviewWindow(item["path"], 3, animation).exec_()
+                PreviewWindow(item["path"], 200, animation).exec_()
         except Exception as e:
             print(f"[preview_texture] {e}")
 
