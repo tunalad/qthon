@@ -11,6 +11,7 @@
 import sys, os, tempfile
 import ui.resource_ui
 from shutil import rmtree, copyfile
+from appdirs import user_data_dir
 from PyQt5 import uic, QtGui, QtCore
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -43,6 +44,13 @@ class MainWindow(QMainWindow):
         self.history = history.History()
         self.temp_dir = None
         self.save_pos = None
+        self.user_data_dir = user_data_dir("qthon")
+
+        # make data dir & it's file if tey don't exist
+        if not os.path.exists(self.user_data_dir):
+            os.makedirs(self.user_data_dir)
+        with open(os.path.join(self.user_data_dir, "recent_files"), "a") as file:
+            pass
 
         self.new_wad()
 
@@ -63,14 +71,13 @@ class MainWindow(QMainWindow):
         )
         #####################################
 
-
         # TOGGLABLE ITEMS
-        togglable_actions = [ # EXACTLY 1 selection
-            self.actionRename, 
-            self.actionResize
+        togglable_actions = [  # EXACTLY 1 selection
+            self.actionRename,
+            self.actionResize,
         ]
 
-        togglable_actions_lto = [ # LESS than 1 item
+        togglable_actions_lto = [  # LESS than 1 item
             self.actionMirror,
             self.actionFlip,
             self.actionCut,
@@ -114,13 +121,15 @@ class MainWindow(QMainWindow):
         self.actionView_Detailed.triggered.connect(lambda: self.preview_texture())
         self.actionView_Animated.triggered.connect(lambda: self.preview_texture(True))
 
+        self.open_recent()
+
         ## item selection
         ### statusbar preview
-        self.lw_textures.itemSelectionChanged.connect(
-            lambda: self.statusbar.showMessage(
-                f'{self.history.state[self.history.position -1]["list-state"][self.lw_textures.currentRow()]}'
-            )
-        )
+        # self.lw_textures.itemSelectionChanged.connect(
+        #    lambda: self.statusbar.showMessage(
+        #        f'{self.history.state[self.history.position -1]["list-state"][self.lw_textures.currentRow()]}'
+        #    )
+        # )
 
         ### togglable items when we selected EXACTLY 1 item
         self.lw_textures.itemSelectionChanged.connect(
@@ -180,7 +189,9 @@ class MainWindow(QMainWindow):
         try:
             if action:
                 widget.setVisible(not action.isChecked())
-                action.triggered.connect(lambda: widget.setVisible(not action.isChecked()))
+                action.triggered.connect(
+                    lambda: widget.setVisible(not action.isChecked())
+                )
             else:
                 print(f"can't find action: {widget.objectName()}")
 
@@ -201,7 +212,9 @@ class MainWindow(QMainWindow):
             else:
                 return
 
-            self.lw_textures.setIconSize(QtCore.QSize(self.texture_size, self.texture_size))
+            self.lw_textures.setIconSize(
+                QtCore.QSize(self.texture_size, self.texture_size)
+            )
         except Exception as e:
             print(f"[adjust_zoom] {e}")
 
@@ -243,11 +256,61 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"[new_wad] {e}")
 
-    def open_wad(self):
+    def open_recent(self, new_path=None):
         try:
-            self.wad_path, _ = QFileDialog.getOpenFileName(
-                self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
-            )
+            recent_files = os.path.join(self.user_data_dir, "recent_files")
+
+            self.menuOpen_Recent.clear()
+
+            # remove line if it's already in the list
+            with open(recent_files, "r+") as file:
+                lines = file.readlines()
+                file.seek(0)
+                file.truncate()
+                for line in lines:
+                    if line.strip("\n") != new_path:
+                        file.write(line)
+
+            # add new path to list
+            if new_path:
+                with open(recent_files, "a") as file:
+                    file.write(new_path + "\n")
+
+            # create menu items
+            if os.path.exists(recent_files):
+                # trim so we don't have > 10
+                with open(recent_files, "r+") as file:
+                    lines = file.readlines()
+                    if len(lines) > 10:
+                        file.seek(0)
+                        file.truncate()
+                        file.writelines(lines[-10:])
+
+                # create menu items
+                with open(recent_files, "r") as file:
+                    paths = reversed(file.readlines())
+
+                    for p in paths:
+                        p = p.strip()
+                        if os.path.exists(p) and os.path.isfile(p):
+                            action = QAction(p, self)
+                            action.triggered.connect(
+                                lambda checked, path=p: self.open_wad(path)
+                            )
+                            self.menuOpen_Recent.addAction(action)
+
+                self.menuOpen_Recent.setEnabled(len(self.menuOpen_Recent.actions()) > 0)
+        except Exception as e:
+            print(f"[open_recent] {e}")
+
+    def open_wad(self, wad_path=None):
+        try:
+            if not wad_path:
+                self.wad_path, _ = QFileDialog.getOpenFileName(
+                    self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
+                )
+            else:
+                self.wad_path = wad_path
 
             if not self.wad_path:
                 return
@@ -262,6 +325,8 @@ class MainWindow(QMainWindow):
             self.lw_textures.clear()
             self.unpack_wad(self.wad_path)
             self.save_pos = self.history.position
+
+            self.open_recent(self.wad_path)
         except Exception as e:
             print(f"[open_wad] {e}")
 
@@ -315,18 +380,23 @@ class MainWindow(QMainWindow):
     def import_image(self):
         try:
             images, _ = QFileDialog.getOpenFileNames(
-                self, "Select image(s)", "", "Images (*.png *.jpg *.jpeg);;All Files (*)"
+                self,
+                "Select image(s)",
+                "",
+                "Images (*.png *.jpg *.jpeg);;All Files (*)",
             )
 
             textures = import_texture(images, self.temp_dir)
-            #__import__('pprint').pprint(imported_textures)
+            # __import__('pprint').pprint(imported_textures)
             for t in textures:
                 scaled_pixmap = QtGui.QPixmap(t).scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                 )
 
                 scaled_icon = QtGui.QIcon(scaled_pixmap)
-                item = QListWidgetItem(scaled_icon, os.path.splitext(os.path.basename(t))[0])
+                item = QListWidgetItem(
+                    scaled_icon, os.path.splitext(os.path.basename(t))[0]
+                )
 
                 item.setData(QtCore.Qt.UserRole, t)  # icon path
 
@@ -551,7 +621,9 @@ class MainWindow(QMainWindow):
                     flip_list = flip_list.data().decode("utf-8").split("\n")
                     mirror_list = mirror_list.data().decode("utf-8").split("\n")
 
-                    existing_textures = [item["title"] for item in self.get_list_state()]
+                    existing_textures = [
+                        item["title"] for item in self.get_list_state()
+                    ]
 
                     # create list items and add them to the list widget
                     for i in range(len(texture_paths)):
@@ -578,7 +650,9 @@ class MainWindow(QMainWindow):
 
                         # create the item
                         scaled_pixmap = QtGui.QPixmap(copy_path).scaled(
-                            self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
+                            self.texture_size,
+                            self.texture_size,
+                            QtCore.Qt.KeepAspectRatio,
                         )
                         scaled_icon = QtGui.QIcon(scaled_pixmap)
 

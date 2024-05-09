@@ -115,8 +115,14 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <widget class="QMenu" name="menuOpen_Recent">
+     <property name="title">
+      <string>Open &amp;Recent</string>
+     </property>
+    </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="menuOpen_Recent"/>
     <addaction name="actionImport"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
@@ -718,6 +724,26 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionpath_to_file">
+   <property name="text">
+    <string>path/to/file</string>
+   </property>
+  </action>
+  <action name="actionasd">
+   <property name="text">
+    <string>asd</string>
+   </property>
+  </action>
+  <action name="actionasdsada">
+   <property name="text">
+    <string>asdsada</string>
+   </property>
+  </action>
+  <action name="actionsdsd">
+   <property name="text">
+    <string>sdsd</string>
    </property>
   </action>
  </widget>
