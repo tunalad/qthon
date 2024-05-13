@@ -332,12 +332,17 @@ class MainWindow(QMainWindow):
 
     def import_wad(self):
         try:
-            wad_path, _ = QFileDialog.getOpenFileName(
+            wad_paths, _ = QFileDialog.getOpenFileNames(
                 self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
             )
 
-            if wad_path:
-                self.unpack_wad(wad_path)
+            if len(wad_paths) < 1:
+                return
+
+            for wad in wad_paths:
+                self.unpack_wad(wad)
+
+            self.history.new_change(self.get_list_state())
         except Exception as e:
             print(f"[import_wad] {e}")
 
@@ -372,8 +377,6 @@ class MainWindow(QMainWindow):
                 item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}.png")  # icon path
 
                 self.lw_textures.addItem(item)
-
-            self.history.new_change(self.get_list_state())
         except Exception as e:
             print(f"[unpack_wad] {e}")
 
