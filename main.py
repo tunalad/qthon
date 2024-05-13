@@ -95,9 +95,8 @@ class MainWindow(QMainWindow):
         self.actionQuit.triggered.connect(lambda: self.close())
 
         self.actionOpen.triggered.connect(lambda: self.open_wad())
-        self.actionImport.triggered.connect(lambda: self.import_wad())
+        self.actionImport.triggered.connect(lambda: self.import_wads_images())
         self.actionNew.triggered.connect(lambda: self.new_wad())
-        self.actionNew_Item.triggered.connect(lambda: self.import_image())
 
         self.actionZoom_In.triggered.connect(lambda: self.adjust_zoom("in"))
         self.actionZoom_Out.triggered.connect(lambda: self.adjust_zoom("out"))
@@ -330,12 +329,41 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"[open_wad] {e}")
 
-    def import_wad(self):
+    def import_wads_images(self):
         try:
-            wad_paths, _ = QFileDialog.getOpenFileNames(
-                self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
+            import_paths, _ = QFileDialog.getOpenFileNames(
+                self,
+                "Import file(s)",
+                "",
+                "WAD Files (*.wad);;Images (*.png *.jpg *.jpeg);;All files (*)",
             )
 
+            wad_paths = []
+            image_paths = []
+            extra_paths = []
+
+            for path in import_paths:
+                if path.lower().endswith(".wad"):
+                    wad_paths.append(path)
+                elif path.lower().endswith((".png", ".jpg", ".jpeg")):
+                    image_paths.append(path)
+                else:
+                    extra_paths.append(path)
+
+            self.import_wad(wad_paths)
+            self.import_image(image_paths)
+
+            if len(extra_paths) > 0:
+                QMessageBox.warning(
+                    self,
+                    "Qthon Warning",
+                    f"Some files selected can't be imported:\n    - {'\n    - '.join(os.path.basename(p) for p in extra_paths)}",
+                )
+        except Exception as e:
+            print(f"[import_wads_images] {e}")
+
+    def import_wad(self, wad_paths):
+        try:
             if len(wad_paths) < 1:
                 return
 
@@ -345,6 +373,33 @@ class MainWindow(QMainWindow):
             self.history.new_change(self.get_list_state())
         except Exception as e:
             print(f"[import_wad] {e}")
+
+    def import_image(self, images):
+        try:
+            textures = import_texture(images, self.temp_dir)
+            # __import__('pprint').pprint(imported_textures)
+
+            if len(textures) < 1:
+                return
+
+            for t in textures:
+                scaled_pixmap = QtGui.QPixmap(t).scaled(
+                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
+                )
+
+                scaled_icon = QtGui.QIcon(scaled_pixmap)
+                item = QListWidgetItem(
+                    scaled_icon, os.path.splitext(os.path.basename(t))[0]
+                )
+
+                item.setData(QtCore.Qt.UserRole, t)  # icon path
+
+                self.lw_textures.addItem(item)
+
+            self.history.new_change(self.get_list_state())
+        except Exception as e:
+            print(f"[import_image] {e}")
+        pass
 
     def save_wad(self, save_as=False):
         try:
@@ -379,36 +434,6 @@ class MainWindow(QMainWindow):
                 self.lw_textures.addItem(item)
         except Exception as e:
             print(f"[unpack_wad] {e}")
-
-    def import_image(self):
-        try:
-            images, _ = QFileDialog.getOpenFileNames(
-                self,
-                "Select image(s)",
-                "",
-                "Images (*.png *.jpg *.jpeg);;All Files (*)",
-            )
-
-            textures = import_texture(images, self.temp_dir)
-            # __import__('pprint').pprint(imported_textures)
-            for t in textures:
-                scaled_pixmap = QtGui.QPixmap(t).scaled(
-                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
-                )
-
-                scaled_icon = QtGui.QIcon(scaled_pixmap)
-                item = QListWidgetItem(
-                    scaled_icon, os.path.splitext(os.path.basename(t))[0]
-                )
-
-                item.setData(QtCore.Qt.UserRole, t)  # icon path
-
-                self.lw_textures.addItem(item)
-            self.history.new_change(self.get_list_state())
-            print(self.get_list_state())
-        except Exception as e:
-            print(f"[import_image] {e}")
-        pass
 
     def disable_actions(self, actions, not_implemented=True):
         try:

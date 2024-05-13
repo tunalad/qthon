@@ -192,7 +192,6 @@
     <addaction name="actionSelect_All"/>
     <addaction name="actionDeselect_All"/>
     <addaction name="separator"/>
-    <addaction name="actionNew_Item"/>
     <addaction name="menu_Sort_Items"/>
     <addaction name="separator"/>
     <addaction name="actionRename"/>
@@ -249,7 +248,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionNew_Item"/>
    <addaction name="actionResize"/>
    <addaction name="actionRename"/>
    <addaction name="actionFlip"/>
@@ -359,7 +357,7 @@
   <action name="actionImport">
    <property name="icon">
     <iconset resource="fugue_icons.qrc">
-     <normaloff>:/icons/fugue-icons/arrow-000-medium.png</normaloff>:/icons/fugue-icons/arrow-000-medium.png</iconset>
+     <normaloff>:/icons/fugue-icons/document--arrow.png</normaloff>:/icons/fugue-icons/document--arrow.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Import...</string>
@@ -490,18 +488,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
-   </property>
-   <property name="iconVisibleInMenu">
-    <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionNew_Item">
-   <property name="icon">
-    <iconset resource="fugue_icons.qrc">
-     <normaloff>:/icons/fugue-icons/image--plus.png</normaloff>:/icons/fugue-icons/image--plus.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;New Item</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>

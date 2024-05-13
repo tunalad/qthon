@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>fugue-icons/document--arrow.png</file>
+    <file>fugue-icons/image--arrow.png</file>
     <file>fugue-icons/magnifier--plus.png</file>
     <file>fugue-icons/magnifier--minus.png</file>
     <file>fugue-icons/clipboard-paste-document-text.png</file>
