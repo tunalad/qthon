@@ -27,4 +27,7 @@
     <file>fugue-icons/scissors-blue.png</file>
     <file>fugue-icons/ui-panel-resize.png</file>
   </qresource>
+  <qresource prefix="logo">
+    <file>qthon.png</file>
+  </qresource>
 </RCC>
