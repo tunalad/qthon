@@ -38,6 +38,8 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         uic.loadUi("ui/main.ui", self)
 
+        self.setAcceptDrops(True)
+
         self.wad_path = None
         self.texture_size = 128
         self.texture_spacing = 17
@@ -155,6 +157,10 @@ class MainWindow(QMainWindow):
 
         self.history.position_callback = self.title_management
 
+    # # # # # # # # # # # #
+    # PROPERTIES
+    # # # # # # # # # # # #
+
     @property
     def save_pos(self):
         """The save_pos property."""
@@ -165,6 +171,25 @@ class MainWindow(QMainWindow):
         self._save_pos = value
         self.title_management()
 
+    # # # # # # # # # # # #
+    # EVENTS
+    # # # # # # # # # # # #
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+            self.lw_textures.setStyleSheet("background-color: rgb(131, 131, 131);")
+        else:
+            event.ignore()
+
+    def dragLeaveEvent(self, event):
+        self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
+
+    def dropEvent(self, event):
+        files = [url.toLocalFile() for url in event.mimeData().urls()]
+        self.import_wads_images(dropped_files=files)
+        self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
+
     def closeEvent(self, event):
         try:
             rmtree(self.temp_dir)
@@ -172,6 +197,10 @@ class MainWindow(QMainWindow):
             print(f"[closeEvent] {e}")
         finally:
             event.accept()
+
+    # # # # # # # # # # # #
+    # FUNCTIONS
+    # # # # # # # # # # # #
 
     def title_management(self):
         try:
@@ -329,14 +358,17 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"[open_wad] {e}")
 
-    def import_wads_images(self):
+    def import_wads_images(self, dropped_files=None):
         try:
-            import_paths, _ = QFileDialog.getOpenFileNames(
-                self,
-                "Import file(s)",
-                "",
-                "WAD Files (*.wad);;Images (*.png *.jpg *.jpeg);;All files (*)",
-            )
+            if dropped_files:
+                import_paths = dropped_files
+            else:
+                import_paths, _ = QFileDialog.getOpenFileNames(
+                    self,
+                    "Import file(s)",
+                    "",
+                    "WAD Files (*.wad);;Images (*.png *.jpg *.jpeg);;All files (*)",
+                )
 
             wad_paths = []
             image_paths = []
