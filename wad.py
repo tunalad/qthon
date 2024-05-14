@@ -47,7 +47,7 @@ def unwad(wad_path, temp_dir):
                 fullpath_ext = "{0}.png".format(fullpath_ext)  # Update fullpath_ext
                 count += 1
 
-            #print(fullpath_ext)
+            # print(fullpath_ext)
 
             # Add texture name to the list
             texture_names.append(os.path.splitext(os.path.basename(fullpath_ext))[0])
@@ -88,8 +88,8 @@ def unwad(wad_path, temp_dir):
     return temp_dir, texture_names
 
 
-def wadup(in_path, out_path):
-    # Ensure output directory structure
+def wadup(in_paths, out_path):
+    # ensure output directory structure
     out_dir = os.path.dirname(out_path) or "."
     os.makedirs(out_dir, exist_ok=True)
 
@@ -103,9 +103,8 @@ def wadup(in_path, out_path):
 
     # making the WAD itself
     with wad.WadFile(out_path, "w") as wad_file:
-        for file_name in os.listdir(in_path):
-            if file_name.endswith(".png"):
-                file_path = os.path.join(in_path, file_name)
+        for file_path in in_paths:
+            if file_path.endswith(".png"):
                 try:
                     # process the image
                     with Image.open(file_path).convert(mode="RGB") as img:
@@ -140,22 +139,22 @@ def wadup(in_path, out_path):
                         info.compression = wad.CompressionType.NONE
                         info.type = wad.LumpType.MIPTEX
 
-                        print(f"Adding: {file_name}")
+                        print(f"Adding: {file_path}")
 
                         wad_file.writestr(info, buff)
 
                 except Exception as e:
-                    print(f"Error processing {file_name}: {e}")
+                    print(f"Error processing {file_path}: {e}")
 
 
 def flip_texture(texture_path, mirror=False):
     img = Image.open(texture_path)
 
-    if mirror: 
+    if mirror:
         flipped = img.transpose(Image.FLIP_LEFT_RIGHT)
     else:
         flipped = img.transpose(Image.FLIP_TOP_BOTTOM)
-    
+
     flipped.save(texture_path)
 
     flipped.close()
@@ -194,7 +193,6 @@ def import_texture(images, temp_dir):
         img.close()
         new_paths.append(new_path)
     return new_paths
-
 
 
 def main():

@@ -409,7 +409,13 @@ class MainWindow(QMainWindow):
                 )
 
             if self.wad_path:
-                wadup(self.temp_dir, self.wad_path)
+                # show items
+                textures_list = []
+                for t in range(self.lw_textures.count()):
+                    item = self.lw_textures.item(t)
+                    textures_list.append(item.data(QtCore.Qt.UserRole))
+
+                wadup(textures_list, self.wad_path)
                 self.save_pos = self.history.position
 
         except Exception as e:
