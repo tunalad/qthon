@@ -63,8 +63,6 @@ class MainWindow(QMainWindow):
         self.disable_actions(
             [
                 # self.action,
-                # EDIT
-                self.menu_Sort_Items,
                 # VIEW
                 self.actionPreferences,
                 # HELP
@@ -112,6 +110,9 @@ class MainWindow(QMainWindow):
         self.actionResize.triggered.connect(lambda: self.resize_texture())
         self.actionFlip.triggered.connect(lambda: self.flip_texture(mirror=False))
         self.actionMirror.triggered.connect(lambda: self.flip_texture(mirror=True))
+
+        self.action_Ascending.triggered.connect(lambda: self.sort_textures(False))
+        self.action_Descending.triggered.connect(lambda: self.sort_textures(True))
 
         self.actionUndo.triggered.connect(lambda: self.undo_redo(False))
         self.actionRedo.triggered.connect(lambda: self.undo_redo(True))
@@ -182,7 +183,7 @@ class MainWindow(QMainWindow):
         else:
             event.ignore()
 
-    def dragLeaveEvent(self, event):
+    def dragLeaveEvent(self):
         self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
 
     def dropEvent(self, event):
@@ -190,7 +191,7 @@ class MainWindow(QMainWindow):
         self.import_wads_images(dropped_files=files)
         self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
 
-    def closeEvent(self, event):
+    def closeEvent(self):
         try:
             rmtree(self.temp_dir)
         except Exception as e:
@@ -506,6 +507,19 @@ class MainWindow(QMainWindow):
                 self.actionView_Animated.setEnabled(True)
         except Exception as e:
             print(f"[disable_previews] {e}")
+
+    def sort_textures(self, descending=False):
+        try:
+            sort_order = QtCore.Qt.AscendingOrder
+
+            if descending:
+                sort_order = QtCore.Qt.DescendingOrder
+
+            self.lw_textures.sortItems(sort_order)
+
+            self.history.new_change(self.get_list_state())
+        except Exception as e:
+            print(f"[sort_textures] {e}")
 
     def delete_textures(self):
         try:
