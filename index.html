@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Quake-style fluids Demo</title>
+        <style type="text/css">
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            #demo {
+                width: 100%;
+                max-width: 30em;
+                height: 30em;
+                box-sizing: border-box;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="demo"></canvas>
+        <script type="text/javascript">
+            quakeFluid(
+                "lava.png",
+                document.getElementById("demo"),
+                0.6,
+                0.5,
+                1,
+                1,
+            );
+
+            // ˇˇˇˇˇˇ function implementation ˇˇˇˇˇˇ
+            var sinLUT = [];
+            for (var i = 0; i < 2 * Math.PI; i += 0.01)
+                sinLUT[sinLUT.length] = Math.sin(i) * 16;
+            function sine(i) {
+                return sinLUT[~~(i >= 0 ? i : -i) % sinLUT.length];
+            }
+            function quakeFluid(
+                texture,
+                canvas,
+                scale,
+                resScale,
+                speed,
+                intensity,
+                closeness,
+            ) {
+                if (!resScale || resScale < 0.1) resScale = 1;
+                if (!speed) speed = 1;
+                if (!intensity || intensity > 1.5 || intensity < -1.5)
+                    intensity = 1;
+                if (!closeness || closeness <= 0) closeness = 1;
+                canvas.isVisible = function () {
+                    var r = canvas.getBoundingClientRect();
+                    return (
+                        r.top + r.height >= 0 &&
+                        r.left + r.width >= 0 &&
+                        r.bottom - r.height <=
+                            (window.innerHeight ||
+                                document.documentElement.clientHeight) &&
+                        r.right - r.width <=
+                            (window.innerWidth ||
+                                document.documentElement.clientWidth)
+                    );
+                }.bind(this);
+                canvas.qfSetResScale = function (r) {
+                    if (!r || r < 0.1) r = 1;
+                    resScale = r;
+                    canvas.prevWidth = 0;
+                    canvas.prevHeight = 0;
+                }.bind(this);
+                canvas.qfGetResScale = function () {
+                    return resScale;
+                }.bind(this);
+                canvas.qfScale = scale;
+                canvas.qfSpeed = speed;
+                canvas.qfIntensity = intensity;
+                canvas.qfCloseness = closeness;
+                canvas.style.imageRendering = "pixelated";
+                canvas.qfSetTexture = function (texture) {
+                    var tex = new Image();
+                    tex.src = texture;
+                    tex.onload = function () {
+                        var qfTex = document.createElement("canvas");
+                        qfTex.width = tex.naturalWidth;
+                        qfTex.height = tex.naturalHeight;
+                        qfTex.getContext("2d").drawImage(tex, 0, 0);
+                        qfTex = qfTex
+                            .getContext("2d")
+                            .getImageData(
+                                0,
+                                0,
+                                tex.naturalWidth,
+                                tex.naturalHeight,
+                            );
+                        canvas.qfTexW = qfTex.width;
+                        canvas.qfTexH = qfTex.height;
+                        var qfTexCopy = [];
+                        for (var i = 0; i < qfTex.data.length; i++)
+                            qfTexCopy[i] = qfTex.data[i];
+                        canvas.qfTex = qfTexCopy;
+                    }.bind(this);
+                }.bind(this);
+                canvas.qfSetTexture(texture);
+                canvas.qfFrame = function () {
+                    if (canvas.qfTex == null || !canvas.isVisible()) return;
+                    var ctx = canvas.getContext("2d");
+                    var out = canvas.qfFrameBuffer.data;
+                    var t = ~~(new Date().getTime() * canvas.qfSpeed);
+                    var compScale = canvas.qfCloseness * resScale * 2;
+                    var xOff, yOff, yM, xM, txM;
+                    for (var y = 0; y < canvas.height; y++) {
+                        yM = y * canvas.width;
+                        for (var x = 0; x < canvas.width; x++) {
+                            xM = 4 * (yM + x);
+                            yOff =
+                                ~~(
+                                    (y / compScale +
+                                        canvas.qfIntensity *
+                                            sine(
+                                                t / 16 + (x / compScale) * 2,
+                                            )) *
+                                    canvas.qfScale
+                                ) % canvas.qfTexH;
+                            yOff = yOff >= 0 ? yOff : canvas.qfTexH + yOff;
+                            xOff =
+                                ~~(
+                                    (x / compScale +
+                                        canvas.qfIntensity *
+                                            sine(
+                                                t / 16 + (y / compScale) * 2,
+                                            )) *
+                                    canvas.qfScale
+                                ) % canvas.qfTexW;
+                            xOff = xOff >= 0 ? xOff : canvas.qfTexW + xOff;
+                            txM = 4 * (yOff * canvas.qfTexW + xOff);
+                            out[xM] = canvas.qfTex[txM];
+                            out[xM + 1] = canvas.qfTex[txM + 1];
+                            out[xM + 2] = canvas.qfTex[txM + 2];
+                            out[xM + 3] = canvas.qfTex[txM + 3];
+                        }
+                    }
+                    ctx.putImageData(canvas.qfFrameBuffer, 0, 0);
+                }.bind(this);
+                var raf = function () {
+                    if (
+                        canvas.prevWidth != canvas.clientWidth ||
+                        canvas.prevHeight != canvas.clientHeight
+                    ) {
+                        var newW = ~~(canvas.clientWidth * resScale),
+                            newH = ~~(canvas.clientHeight * resScale);
+                        canvas.width = newW > 8 ? newW : 8;
+                        canvas.height = newH > 8 ? newH : 8;
+                        canvas.qfFrameBuffer = canvas
+                            .getContext("2d")
+                            .createImageData(canvas.width, canvas.height);
+                        canvas.prevWidth = canvas.clientWidth;
+                        canvas.prevHeight = canvas.clientHeight;
+                    }
+                    canvas.qfFrame();
+                    canvas.qfInterval = requestAnimationFrame(raf);
+                }.bind(this);
+                canvas.qfStop = function () {
+                    cancelAnimationFrame(canvas.qfInterval);
+                }.bind(this);
+                raf();
+            }
+        </script>
+    </body>
+</html>

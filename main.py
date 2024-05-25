@@ -28,6 +28,7 @@ from RenameWindow import RenameWindow
 from ResizeWindow import ResizeWindow
 from AboutWindow import AboutWindow
 from PreviewWindow import PreviewWindow
+from WaterWindow import LiquidPreview
 
 import history
 from wad import unwad, wadup, flip_texture, import_texture
@@ -191,7 +192,7 @@ class MainWindow(QMainWindow):
         self.import_wads_images(dropped_files=files)
         self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
 
-    def closeEvent(self):
+    def closeEvent(self, event):
         try:
             rmtree(self.temp_dir)
         except Exception as e:
@@ -263,9 +264,7 @@ class MainWindow(QMainWindow):
                 "path": selected_items[0].data(QtCore.Qt.UserRole),
             }
             if os.path.basename(item["path"]).startswith("*") and animation:
-                QMessageBox.warning(
-                    self, "Qthon Error", "No water animations implemented yet :("
-                )
+                LiquidPreview(texture=item["path"], port=9742).exec()
             else:
                 PreviewWindow(item["path"], 200, animation).exec_()
         except Exception as e:
