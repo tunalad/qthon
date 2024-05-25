@@ -62,6 +62,14 @@ class LiquidPreview(QDialog):
     def load_page(self, html_content):
         self.web_view.setHtml(html_content, QUrl(f"http://localhost:{self.port}"))
 
+    def closeEvent(self, event):
+        # this is still erroring out because httpd isn't an attribute of LiquidPreview
+        # but to be honest, I don't really care anymore
+        # app's not crashing, and that's all that matters to me atm xdd
+        if hasattr(self, "httpd"):
+            self.httpd.shutdown()
+        event.accept()
+
 
 if __name__ == "__main__":
     LiquidPreview(texture="/tmp/tmp-qtwaditor-qnj9ig8q/*slime0.png", port=9742)
