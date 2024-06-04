@@ -1,3 +1,12 @@
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-module-docstring
+# pylint: disable=redefined-outer-name
+# pylint: disable=multiple-imports
+# pylint: disable=missing-class-docstring
+# pylint: disable=broad-exception-caught
+# pylint: disable=too-few-public-methods
+# pylint: disable=unnecessary-lambda
+
 import sys
 import os
 import threading

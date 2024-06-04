@@ -22,6 +22,10 @@ from PyQt5.QtWidgets import (
     QListView,
     QMessageBox,
     QAction,
+    QLineEdit,
+    QWidget,
+    QSpacerItem,
+    QSizePolicy,
 )
 
 from RenameWindow import RenameWindow
@@ -56,6 +60,8 @@ class MainWindow(QMainWindow):
             pass
 
         self.new_wad()
+
+        self.set_search()
 
         self.show()
 
@@ -203,6 +209,29 @@ class MainWindow(QMainWindow):
     # # # # # # # # # # # #
     # FUNCTIONS
     # # # # # # # # # # # #
+
+    def set_search(self):
+        self.search_bar = QLineEdit(self.tb_options)
+        self.search_bar.setPlaceholderText("Search...")
+        self.search_bar.setMaximumWidth(250)
+        self.search_bar.setMinimumWidth(30)
+
+        self.search_bar.setClearButtonEnabled(True)
+
+        spacer = QWidget(self.tb_options)
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+        self.tb_options.addWidget(spacer)
+        self.tb_options.addWidget(self.search_bar)
+
+        self.search_bar.textChanged.connect(self.fzf_textures)
+
+    def fzf_textures(self):
+        search_text = self.search_bar.text().lower()
+        for index in range(self.lw_textures.count()):
+            item = self.lw_textures.item(index)
+            item_text = item.text().lower()
+            item.setHidden(search_text not in item_text)
 
     def title_management(self):
         try:

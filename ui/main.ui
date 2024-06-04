@@ -72,7 +72,7 @@
        <enum>QListView::Adjust</enum>
       </property>
       <property name="layoutMode">
-       <enum>QListView::Batched</enum>
+       <enum>QListView::SinglePass</enum>
       </property>
       <property name="spacing">
        <number>16</number>
@@ -234,6 +234,7 @@
    <addaction name="separator"/>
    <addaction name="actionZoom_In"/>
    <addaction name="actionZoom_Out"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QToolBar" name="tb_editor">
    <property name="windowTitle">
