@@ -380,7 +380,7 @@ class MainWindow(QMainWindow):
             self.history.reset_state()
 
             self.lw_textures.clear()
-            self.unpack_wad(self.wad_path)
+            self.import_wad([self.wad_path])
             self.save_pos = self.history.position
 
             self.open_recent(self.wad_path)

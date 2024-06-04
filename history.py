@@ -9,9 +9,10 @@ from pprint import pprint
 
 
 class History:
-    def __init__(self):
+    def __init__(self, history_limit=0):
         super().__init__()
         self.temp_dir = None
+        self.history_limit = history_limit + 1
         self.state = [{"time": time(), "list-state": []}]
         self.position_callback = None
         self.position = 1
@@ -20,6 +21,7 @@ class History:
     def position(self):
         """The position property."""
         return self._position
+
     @position.setter
     def position(self, value):
         self._position = value
@@ -54,6 +56,18 @@ class History:
 
             self.state.append({"time": current_time, "list-state": new_state})
             self.position = len(self.state)
+
+            # history limit
+            if self.history_limit > 1:
+                if len(self.state) > self.history_limit:
+                    removed_snapshots = self.state[: -self.history_limit]
+                    for snapshot in removed_snapshots:
+                        snapshot_dir = os.path.join(
+                            self.SNAPSHOTS, str(snapshot["time"])
+                        )
+                        shutil.rmtree(snapshot_dir, ignore_errors=True)
+                    self.state = self.state[-self.history_limit :]
+                    self.position = self.history_limit
 
             self.take_snapshot(str(current_time))
             self.print_state()
@@ -127,7 +141,7 @@ class History:
                     dest_path = os.path.join(snap_dir, filename)
                     # Copy the file to the snapshot directory
                     shutil.copy(file_path, dest_path)
-            #print(f"Snapshot '{snap_name}' made")
+            # print(f"Snapshot '{snap_name}' made")
         except Exception as e:
             print(f"[History/take_snapshot] {e}")
 
@@ -141,7 +155,7 @@ class History:
 
             snap_dir = os.path.join(self.SNAPSHOTS, snap_name)
             if not os.path.exists(snap_dir):
-                #print(f"Snapshot '{snap_name}' does not exist")
+                # print(f"Snapshot '{snap_name}' does not exist")
                 return
 
             # remove shyt (except the snaps dir)
@@ -157,6 +171,6 @@ class History:
                 dest_path = os.path.join(self.temp_dir, filename)
                 shutil.copy(src_path, dest_path)
 
-            #print(f"Snapshot '{snap_name}' loaded")
+            # print(f"Snapshot '{snap_name}' loaded")
         except Exception as e:
             print(f"[History/load_snapshot] {e}")
