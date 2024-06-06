@@ -33,8 +33,9 @@ from ResizeWindow import ResizeWindow
 from AboutWindow import AboutWindow
 from PreviewWindow import PreviewWindow
 from WaterWindow import LiquidPreview
+from PreferencesWindow import PreferencesWindow
 
-import history
+import history, settings
 from wad import unwad, wadup, flip_texture, import_texture
 
 
@@ -48,7 +49,10 @@ class MainWindow(QMainWindow):
         self.wad_path = None
         self.texture_size = 128
         self.texture_spacing = 17
-        self.history = history.History()
+        self.undo_limit = 0  # 0 means no limit
+        self.water_port = 9742
+        self.history = None
+        self.settings = settings.Config()
         self.temp_dir = None
         self.save_pos = None
         self.user_data_dir = user_data_dir("qthon")
@@ -59,8 +63,10 @@ class MainWindow(QMainWindow):
         with open(os.path.join(self.user_data_dir, "recent_files"), "a") as file:
             pass
 
-        self.new_wad()
+        self.load_config()
+        self.history = history.History(self.undo_limit)
 
+        self.new_wad()
         self.set_search()
 
         self.show()
@@ -70,11 +76,10 @@ class MainWindow(QMainWindow):
         self.disable_actions(
             [
                 # self.action,
-                # VIEW
-                self.actionPreferences,
                 # HELP
                 self.actionHelp,
-            ]
+            ],
+            True,
         )
         #####################################
 
@@ -99,6 +104,7 @@ class MainWindow(QMainWindow):
         # CONNECTIONS
         ## trigger
         self.actionAbout.triggered.connect(lambda: AboutWindow().exec_())
+        self.actionPreferences.triggered.connect(lambda: self.preferences_handling())
         self.actionQuit.triggered.connect(lambda: self.close())
 
         self.actionOpen.triggered.connect(lambda: self.open_wad())
@@ -131,14 +137,6 @@ class MainWindow(QMainWindow):
         self.actionView_Animated.triggered.connect(lambda: self.preview_texture(True))
 
         self.open_recent()
-
-        ## item selection
-        ### statusbar preview
-        # self.lw_textures.itemSelectionChanged.connect(
-        #    lambda: self.statusbar.showMessage(
-        #        f'{self.history.state[self.history.position -1]["list-state"][self.lw_textures.currentRow()]}'
-        #    )
-        # )
 
         ### togglable items when we selected EXACTLY 1 item
         self.lw_textures.itemSelectionChanged.connect(
@@ -210,6 +208,31 @@ class MainWindow(QMainWindow):
     # FUNCTIONS
     # # # # # # # # # # # #
 
+    def preferences_handling(self):
+        PreferencesWindow(settings=self.settings).exec_()
+        self.load_config()
+        self.bars_manager(self.statusbar, self.actionHide_statusbar)
+        self.bars_manager(
+            self.tb_options, self.actionHide_toolbar, self.actionMovable_toolbar
+        )
+        self.bars_manager(
+            self.tb_editor, self.actionHide_sidebar, self.actionMovable_sidebar
+        )
+
+    def load_config(self):
+        cfg = self.settings.parsed_cfg
+
+        self.texture_size = cfg["default_zoom"]
+        self.undo_limit = cfg["undo_limit"]
+        self.water_port = cfg["water_port"]
+
+        self.actionHide_statusbar.setChecked(cfg["hide_item"]["statusbar"])
+        self.actionHide_toolbar.setChecked(cfg["hide_item"]["toolbar"])
+        self.actionHide_sidebar.setChecked(cfg["hide_item"]["sidebar"])
+
+        self.actionMovable_toolbar.setChecked(cfg["move_item"]["toolbar"])
+        self.actionMovable_sidebar.setChecked(cfg["move_item"]["sidebar"])
+
     def set_search(self):
         self.search_bar = QLineEdit(self.tb_options)
         self.search_bar.setPlaceholderText("Search...")
@@ -255,6 +278,7 @@ class MainWindow(QMainWindow):
                 print(f"can't find action: {widget.objectName()}")
 
             if movable_action:
+                widget.setMovable(movable_action.isChecked())
                 movable_action.setChecked(widget.isMovable())
                 movable_action.triggered.connect(
                     lambda: widget.setMovable(movable_action.isChecked())
@@ -502,7 +526,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"[unpack_wad] {e}")
 
-    def disable_actions(self, actions, not_implemented=True):
+    def disable_actions(self, actions, not_implemented=False):
         try:
             for a in actions:
                 tooltip = a.toolTip()

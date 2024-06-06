@@ -234,7 +234,6 @@
    <addaction name="separator"/>
    <addaction name="actionZoom_In"/>
    <addaction name="actionZoom_Out"/>
-   <addaction name="separator"/>
   </widget>
   <widget class="QToolBar" name="tb_editor">
    <property name="windowTitle">

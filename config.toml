@@ -1,0 +1,14 @@
+# QTHON config file
+
+default_zoom    = 128
+water_port      = 9742
+undo_limit      = 0 # 0 means no limit, anything above it limits the history size
+
+[hide_item]
+toolbar         = false
+sidebar         = false
+statusbar       = false
+
+[move_item]
+toolbar         = false
+sidebar         = false
