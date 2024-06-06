@@ -136,6 +136,33 @@ class MainWindow(QMainWindow):
         self.actionView_Detailed.triggered.connect(lambda: self.preview_texture())
         self.actionView_Animated.triggered.connect(lambda: self.preview_texture(True))
 
+        self.actionHide_toolbar.triggered.connect(
+            lambda: self.update_cfg_item(
+                ["hide_item", "toolbar"], self.actionHide_toolbar.isChecked()
+            )
+        )
+        self.actionHide_sidebar.triggered.connect(
+            lambda: self.update_cfg_item(
+                ["hide_item", "sidebar"], self.actionHide_sidebar.isChecked()
+            )
+        )
+        self.actionHide_statusbar.triggered.connect(
+            lambda: self.update_cfg_item(
+                ["hide_item", "statusbar"], self.actionHide_statusbar.isChecked()
+            )
+        )
+
+        self.actionMovable_toolbar.triggered.connect(
+            lambda: self.update_cfg_item(
+                ["move_item", "toolbar"], self.actionMovable_toolbar.isChecked()
+            )
+        )
+        self.actionMovable_sidebar.triggered.connect(
+            lambda: self.update_cfg_item(
+                ["move_item", "sidebar"], self.actionMovable_sidebar.isChecked()
+            )
+        )
+
         self.open_recent()
 
         ### togglable items when we selected EXACTLY 1 item
@@ -232,6 +259,13 @@ class MainWindow(QMainWindow):
 
         self.actionMovable_toolbar.setChecked(cfg["move_item"]["toolbar"])
         self.actionMovable_sidebar.setChecked(cfg["move_item"]["sidebar"])
+
+    def update_cfg_item(self, keys, value):
+        config = self.settings.parsed_cfg
+        for key in keys[:-1]:
+            config = config[key]
+        config[keys[-1]] = value
+        self.settings.update_config(self.settings.parsed_cfg)
 
     def set_search(self):
         self.search_bar = QLineEdit(self.tb_options)
