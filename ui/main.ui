@@ -141,34 +141,34 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
-    <widget class="QMenu" name="menuToolbar">
+    <widget class="QMenu" name="menuHide">
      <property name="title">
-      <string>&amp;Toolbar</string>
+      <string>Hide</string>
      </property>
      <addaction name="actionHide_toolbar"/>
-     <addaction name="actionMovable_toolbar"/>
-    </widget>
-    <widget class="QMenu" name="menuStatus_Bar">
-     <property name="title">
-      <string>&amp;Status Bar</string>
-     </property>
      <addaction name="actionHide_statusbar"/>
-    </widget>
-    <widget class="QMenu" name="menuSidebar">
-     <property name="title">
-      <string>Si&amp;debar</string>
-     </property>
      <addaction name="actionHide_sidebar"/>
+    </widget>
+    <widget class="QMenu" name="menuType_Here">
+     <property name="title">
+      <string>Type Here</string>
+     </property>
+    </widget>
+    <widget class="QMenu" name="menuMovable_2">
+     <property name="title">
+      <string>Movable</string>
+     </property>
+     <addaction name="actionMovable_toolbar"/>
      <addaction name="actionMovable_sidebar"/>
     </widget>
-    <addaction name="menuToolbar"/>
-    <addaction name="menuSidebar"/>
-    <addaction name="menuStatus_Bar"/>
+    <addaction name="menuHide"/>
+    <addaction name="menuMovable_2"/>
     <addaction name="separator"/>
     <addaction name="actionView_Detailed"/>
     <addaction name="actionView_Animated"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
+    <addaction name="menuType_Here"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -611,7 +611,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Hide</string>
+    <string>Toolbar</string>
    </property>
   </action>
   <action name="actionMovable_toolbar">
@@ -619,7 +619,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Movable</string>
+    <string>Toolbar</string>
    </property>
   </action>
   <action name="actionHide_statusbar">
@@ -630,7 +630,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Hide</string>
+    <string>Statusbar</string>
    </property>
   </action>
   <action name="actionMovable_statusbar">
@@ -638,7 +638,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Movable</string>
+    <string>Movable statusbar</string>
    </property>
   </action>
   <action name="actionRedo">
@@ -661,7 +661,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Hide</string>
+    <string>Sidebar</string>
    </property>
   </action>
   <action name="actionMovable_sidebar">
@@ -669,7 +669,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Movable</string>
+    <string>Sidebar</string>
    </property>
   </action>
   <action name="action_Ascending">
@@ -730,6 +730,16 @@
   <action name="actionsdsd">
    <property name="text">
     <string>sdsd</string>
+   </property>
+  </action>
+  <action name="actionasd_2">
+   <property name="text">
+    <string>asd</string>
+   </property>
+  </action>
+  <action name="actionasdddd">
+   <property name="text">
+    <string>asdddd</string>
    </property>
   </action>
  </widget>
