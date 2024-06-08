@@ -212,10 +212,46 @@ def import_texture(images, temp_dir):
     return new_paths
 
 
+def defullbright(images):
+    # quake palette
+    full_palette = []
+    for p in quake.palette:
+        full_palette += p
+    reduced_palette = full_palette[: 224 * 3]  # remove fullbrights
+
+    palette_image = Image.frombytes("P", (224, 1), bytes(reduced_palette))
+    palette_image.putpalette(
+        reduced_palette + [0] * (256 - 224) * 3
+    )  # pad to 256 colors with zero
+
+    new_paths = []
+    for img_path in images:
+        img = Image.open(img_path).convert("RGB")
+        img = img.quantize(palette=palette_image)
+
+        base_name, ext = os.path.splitext(os.path.basename(img_path))
+        new_path = os.path.join(os.path.dirname(img_path), f"{base_name}-dfb.png")
+
+        # dealing with duplicate names
+        index = 1
+        while os.path.exists(new_path):
+            new_path = os.path.join(
+                os.path.dirname(img_path), f"{base_name}-dfb ({index}).png"
+            )
+            index += 1
+
+        img.save(new_path, format="PNG")
+        img.close()
+        new_paths.append(new_path)
+
+    return new_paths
+
+
 def main():
     # unwaded = unwad("catacomb.wad")
     # pprint(unwaded)
-    wadup("./gass", "gass.wad")
+    # wadup("./gass", "gass.wad")
+    defullbright(["tv-fullbright.png"])
 
 
 if __name__ == "__main__":

@@ -194,6 +194,7 @@
     <addaction name="separator"/>
     <addaction name="menu_Sort_Items"/>
     <addaction name="separator"/>
+    <addaction name="actionDefullbright"/>
     <addaction name="actionRename"/>
     <addaction name="actionResize"/>
    </widget>
@@ -740,6 +741,14 @@
   <action name="actionasdddd">
    <property name="text">
     <string>asdddd</string>
+   </property>
+  </action>
+  <action name="actionDefullbright">
+   <property name="text">
+    <string>De-&amp;fullbright</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
  </widget>

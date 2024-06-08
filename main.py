@@ -36,7 +36,7 @@ from WaterWindow import LiquidPreview
 from PreferencesWindow import PreferencesWindow
 
 import history, settings
-from wad import unwad, wadup, flip_texture, import_texture
+from wad import unwad, wadup, flip_texture, import_texture, defullbright
 
 
 class MainWindow(QMainWindow):
@@ -95,6 +95,7 @@ class MainWindow(QMainWindow):
             self.actionCut,
             self.actionCopy,
             self.actionDelete,
+            self.actionDefullbright,
         ]
 
         # first, we disable them
@@ -123,6 +124,7 @@ class MainWindow(QMainWindow):
         self.actionResize.triggered.connect(lambda: self.resize_texture())
         self.actionFlip.triggered.connect(lambda: self.flip_texture(mirror=False))
         self.actionMirror.triggered.connect(lambda: self.flip_texture(mirror=True))
+        self.actionDefullbright.triggered.connect(lambda: self.defullbright_textures())
 
         self.action_Ascending.triggered.connect(lambda: self.sort_textures(False))
         self.action_Descending.triggered.connect(lambda: self.sort_textures(True))
@@ -558,6 +560,33 @@ class MainWindow(QMainWindow):
                 self.lw_textures.addItem(item)
         except Exception as e:
             print(f"[unpack_wad] {e}")
+
+    def defullbright_textures(self):
+        try:
+            textures = []
+
+            for i in self.lw_textures.selectedItems():
+                textures.append(i.data(QtCore.Qt.UserRole))
+
+            dfb_textures = defullbright(textures)
+
+            for t in dfb_textures:
+                filename = os.path.splitext(os.path.basename(t))[0]
+
+                scaled_pixmap = QtGui.QPixmap(t).scaled(
+                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
+                )
+
+                scaled_icon = QtGui.QIcon(scaled_pixmap)
+                item = QListWidgetItem(scaled_icon, filename)
+
+                item.setData(QtCore.Qt.UserRole, t)  # icon path
+
+                self.lw_textures.addItem(item)
+
+            self.history.new_change(self.get_list_state())
+        except Exception as e:
+            print(f"[defullbright_textures] {e}")
 
     def disable_actions(self, actions, not_implemented=False):
         try:
