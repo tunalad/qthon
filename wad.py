@@ -185,10 +185,17 @@ def import_texture(images, temp_dir):
             if x != new_width or y != new_height:
                 img = img.resize((new_width, new_height))
 
-        img = img.convert("RGB")
+        img = img.convert("P", palette=Image.ADAPTIVE, colors=256)
         base_name = os.path.splitext(os.path.basename(i))[0]
 
+        # dealing with duplicate names
+        index = 1
         new_path = f"{temp_dir}/{base_name}.png"
+        while os.path.exists(new_path):
+            new_path = f"{temp_dir}/{base_name} ({index}).png"
+            index += 1
+
+        # save image
         img.save(new_path, format="PNG")
         img.close()
         new_paths.append(new_path)

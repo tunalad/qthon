@@ -518,7 +518,6 @@ class MainWindow(QMainWindow):
             self.history.new_change(self.get_list_state())
         except Exception as e:
             print(f"[import_image] {e}")
-        pass
 
     def save_wad(self, save_as=False):
         try:
