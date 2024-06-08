@@ -211,19 +211,28 @@ class MainWindow(QMainWindow):
     # # # # # # # # # # # #
 
     def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.accept()
-            self.lw_textures.setStyleSheet("background-color: rgb(131, 131, 131);")
-        else:
-            event.ignore()
+        try:
+            if event.mimeData().hasUrls():
+                event.accept()
+                self.lw_textures.setStyleSheet("background-color: rgb(131, 131, 131);")
+            else:
+                event.ignore()
+        except Exception as e:
+            print(f"[dragEnterEvent] {e}")
 
     def dragLeaveEvent(self):
-        self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
+        try:
+            self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
+        except Exception as e:
+            print(f"[dragLeaveEvent] {e}")
 
     def dropEvent(self, event):
-        files = [url.toLocalFile() for url in event.mimeData().urls()]
-        self.import_wads_images(dropped_files=files)
-        self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
+        try:
+            files = [url.toLocalFile() for url in event.mimeData().urls()]
+            self.import_wads_images(dropped_files=files)
+            self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
+        except Exception as e:
+            print(f"[dropEvent] {e}")
 
     def closeEvent(self, event):
         try:
@@ -238,59 +247,74 @@ class MainWindow(QMainWindow):
     # # # # # # # # # # # #
 
     def preferences_handling(self):
-        PreferencesWindow(settings=self.settings).exec_()
-        self.load_config()
-        self.bars_manager(self.statusbar, self.actionHide_statusbar)
-        self.bars_manager(
-            self.tb_options, self.actionHide_toolbar, self.actionMovable_toolbar
-        )
-        self.bars_manager(
-            self.tb_editor, self.actionHide_sidebar, self.actionMovable_sidebar
-        )
+        try:
+            PreferencesWindow(settings=self.settings).exec_()
+            self.load_config()
+            self.bars_manager(self.statusbar, self.actionHide_statusbar)
+            self.bars_manager(
+                self.tb_options, self.actionHide_toolbar, self.actionMovable_toolbar
+            )
+            self.bars_manager(
+                self.tb_editor, self.actionHide_sidebar, self.actionMovable_sidebar
+            )
+        except Exception as e:
+            print(f"[preferences_handling] {e}")
 
     def load_config(self):
-        cfg = self.settings.parsed_cfg
+        try:
+            cfg = self.settings.parsed_cfg
 
-        self.texture_size = cfg["default_zoom"]
-        self.undo_limit = cfg["undo_limit"]
-        self.water_port = cfg["water_port"]
+            self.texture_size = cfg["default_zoom"]
+            self.undo_limit = cfg["undo_limit"]
+            self.water_port = cfg["water_port"]
 
-        self.actionHide_statusbar.setChecked(cfg["hide_item"]["statusbar"])
-        self.actionHide_toolbar.setChecked(cfg["hide_item"]["toolbar"])
-        self.actionHide_sidebar.setChecked(cfg["hide_item"]["sidebar"])
+            self.actionHide_statusbar.setChecked(cfg["hide_item"]["statusbar"])
+            self.actionHide_toolbar.setChecked(cfg["hide_item"]["toolbar"])
+            self.actionHide_sidebar.setChecked(cfg["hide_item"]["sidebar"])
 
-        self.actionMovable_toolbar.setChecked(cfg["move_item"]["toolbar"])
-        self.actionMovable_sidebar.setChecked(cfg["move_item"]["sidebar"])
+            self.actionMovable_toolbar.setChecked(cfg["move_item"]["toolbar"])
+            self.actionMovable_sidebar.setChecked(cfg["move_item"]["sidebar"])
+        except Exception as e:
+            print(f"[load_config] {e}")
 
     def update_cfg_item(self, keys, value):
-        config = self.settings.parsed_cfg
-        for key in keys[:-1]:
-            config = config[key]
-        config[keys[-1]] = value
-        self.settings.update_config(self.settings.parsed_cfg)
+        try:
+            config = self.settings.parsed_cfg
+            for key in keys[:-1]:
+                config = config[key]
+            config[keys[-1]] = value
+            self.settings.update_config(self.settings.parsed_cfg)
+        except Exception as e:
+            print(f"[update_cfg_item] {e}")
 
     def set_search(self):
-        self.search_bar = QLineEdit(self.tb_options)
-        self.search_bar.setPlaceholderText("Search...")
-        self.search_bar.setMaximumWidth(250)
-        self.search_bar.setMinimumWidth(30)
+        try:
+            self.search_bar = QLineEdit(self.tb_options)
+            self.search_bar.setPlaceholderText("Search...")
+            self.search_bar.setMaximumWidth(250)
+            self.search_bar.setMinimumWidth(30)
 
-        self.search_bar.setClearButtonEnabled(True)
+            self.search_bar.setClearButtonEnabled(True)
 
-        spacer = QWidget(self.tb_options)
-        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            spacer = QWidget(self.tb_options)
+            spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
-        self.tb_options.addWidget(spacer)
-        self.tb_options.addWidget(self.search_bar)
+            self.tb_options.addWidget(spacer)
+            self.tb_options.addWidget(self.search_bar)
 
-        self.search_bar.textChanged.connect(self.fzf_textures)
+            self.search_bar.textChanged.connect(self.fzf_textures)
+        except Exception as e:
+            print(f"[set_search] {e}")
 
     def fzf_textures(self):
-        search_text = self.search_bar.text().lower()
-        for index in range(self.lw_textures.count()):
-            item = self.lw_textures.item(index)
-            item_text = item.text().lower()
-            item.setHidden(search_text not in item_text)
+        try:
+            search_text = self.search_bar.text().lower()
+            for index in range(self.lw_textures.count()):
+                item = self.lw_textures.item(index)
+                item_text = item.text().lower()
+                item.setHidden(search_text not in item_text)
+        except Exception as e:
+            print(f"[fzf_textures] {e}")
 
     def title_management(self):
         try:

@@ -149,11 +149,6 @@
      <addaction name="actionHide_statusbar"/>
      <addaction name="actionHide_sidebar"/>
     </widget>
-    <widget class="QMenu" name="menuType_Here">
-     <property name="title">
-      <string>Type Here</string>
-     </property>
-    </widget>
     <widget class="QMenu" name="menuMovable_2">
      <property name="title">
       <string>Movable</string>
@@ -168,7 +163,6 @@
     <addaction name="actionView_Animated"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
-    <addaction name="menuType_Here"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
