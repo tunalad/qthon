@@ -162,6 +162,14 @@ def flip_texture(texture_path, mirror=False):
 
 
 def import_texture(images, temp_dir):
+    # quake palette
+    palette = []
+    for p in quake.palette:
+        palette += p
+
+    palette_image = Image.frombytes("P", (16, 16), bytes(palette))
+    palette_image.putpalette(palette)
+
     new_paths = []
     for i in images:
         img = Image.open(i)
@@ -185,7 +193,9 @@ def import_texture(images, temp_dir):
             if x != new_width or y != new_height:
                 img = img.resize((new_width, new_height))
 
-        img = img.convert("P", palette=Image.ADAPTIVE, colors=256)
+        img = img.convert("RGB")
+        img = img.quantize(palette=palette_image)
+
         base_name = os.path.splitext(os.path.basename(i))[0]
 
         # dealing with duplicate names
