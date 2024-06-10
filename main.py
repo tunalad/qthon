@@ -56,6 +56,7 @@ class MainWindow(QMainWindow):
         self.temp_dir = None
         self.save_pos = None
         self.user_data_dir = user_data_dir("qthon")
+        self.clipboard_temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-clipboard-")
 
         # make data dir & it's file if tey don't exist
         if not os.path.exists(self.user_data_dir):
@@ -246,6 +247,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         try:
             rmtree(self.temp_dir)
+            rmtree(self.clipboard_temp_dir)
         except Exception as e:
             print(f"[closeEvent] {e}")
         finally:
@@ -801,124 +803,76 @@ class MainWindow(QMainWindow):
         try:
             clipboard = QApplication.clipboard()
             mime_data = QtCore.QMimeData()
+            image_paths = []
 
-            clipboard.clear()  # clear the clipboard
-
-            # get selected items
             selected_items = self.lw_textures.selectedItems()
-            textures_list = []
-            texture_paths = []
-            flip_list = []
-            mirror_list = []
 
-            # extract data from items
+            rmtree(self.clipboard_temp_dir)
+            os.makedirs(self.clipboard_temp_dir, exist_ok=True)
+
             for item in selected_items:
-                textures_list.append(item.text())
-                # texture_paths.append(item.data(QtCore.Qt.UserRole))
-                texture_paths.append(
-                    f"{self.temp_dir}/snapshots/{(self.history.state[self.history.position - 1]['time'])}/{item.text()}.png"
-                )
-                flip_list.append(item.data(QtCore.Qt.UserRole + 1))
-                mirror_list.append(item.data(QtCore.Qt.UserRole + 2))
-                if is_cut:
-                    self.lw_textures.takeItem(self.lw_textures.row(item))
-                    print(
-                        f"{self.temp_dir}/snapshots/{(self.history.state[self.history.position - 1]['time'])}/{item.text()}.png"
+                image_paths.append(item.data(QtCore.Qt.UserRole))
+
+            if image_paths:
+                # Initialize an empty list to hold all URLs
+                urls_to_copy = []
+                for image_path in image_paths:
+                    # Move the image to the clipboard folder
+                    new_path = os.path.join(
+                        self.clipboard_temp_dir, os.path.basename(image_path)
                     )
-                    os.remove(item.data(QtCore.Qt.UserRole))
+                    copyfile(image_path, new_path)
 
-            # make MIME item (for clipboard)
-            text = "\n".join(textures_list)
-            mime_data.setText(text)
+                    # Add the new path as a URL to the urls_to_copy list
+                    urls_to_copy.append(QtCore.QUrl.fromLocalFile(new_path))
 
-            mime_data.setData("texture_paths", bytes("\n".join(texture_paths), "utf-8"))
-            mime_data.setData(
-                "flip_list", bytes("\n".join(str(flip) for flip in flip_list), "utf-8")
-            )
-            mime_data.setData(
-                "mirror_list",
-                bytes("\n".join(str(mirror) for mirror in mirror_list), "utf-8"),
-            )
+                # Set all collected URLs to the clipboard at once
+                mime_data.setUrls(urls_to_copy)
+                clipboard.setMimeData(mime_data)
 
-            # finally, put that thing to clipboard
-            clipboard.setMimeData(mime_data)
+                if is_cut:
+                    for item in selected_items:
+                        self.lw_textures.takeItem(self.lw_textures.row(item))
+                        os.remove(item.data(QtCore.Qt.UserRole))
 
-            if is_cut:
-                self.history.new_change(self.get_list_state())
+                    self.history.new_change(self.get_list_state())
+
         except Exception as e:
-            print(f"[copy_item] {e}")
+            print(f"[cut_copy_item] {e}")
 
     def paste_item(self):
         try:
             clipboard = QApplication.clipboard()
             mime_data = clipboard.mimeData()
 
-            if mime_data.hasText():
-                texture = mime_data.text()
-                texture_paths = mime_data.data("texture_paths")
-                flip_list = mime_data.data("flip_list")
-                mirror_list = mime_data.data("mirror_list")
+            # paste those images where you just copy directly from a page or whatever
+            if mime_data.hasImage():
+                image_data = mime_data.data("image/png")
 
-                if texture_paths:
-                    texture_paths = texture_paths.data().decode("utf-8").split("\n")
-                    textures_list = mime_data.text().split("\n")
-                    flip_list = flip_list.data().decode("utf-8").split("\n")
-                    mirror_list = mirror_list.data().decode("utf-8").split("\n")
+                pixmap = QtGui.QPixmap()
+                pixmap.loadFromData(image_data, "PNG")
 
-                    existing_textures = [
-                        item["title"] for item in self.get_list_state()
-                    ]
+                pasted_dir = os.path.join(self.temp_dir, "pasted")
+                os.makedirs(pasted_dir, exist_ok=True)
+                temp_file_path = os.path.join(pasted_dir, "pasted_image.png")
+                pixmap.save(temp_file_path, "PNG")
 
-                    # create list items and add them to the list widget
-                    for i in range(len(texture_paths)):
-                        texture = textures_list[i]
-                        icon_path = texture_paths[i]
-                        original_path = icon_path
+                self.import_image([temp_file_path])
 
-                        if texture in existing_textures:
-                            count = 1
-                            # slap suffix
-                            while f"{texture} ({count})" in existing_textures:
-                                count += 1
-                            texture = f"{texture} ({count})"
-                            # to the file name too
-                            icon_path, ext = os.path.splitext(icon_path)
-                            icon_path = f"{icon_path} ({count}){ext}"
+            # paste local images
+            elif mime_data.hasUrls():
+                file_paths = [url.toLocalFile() for url in mime_data.urls()]
 
-                        # copy the actual file to the new path
-                        copy_path = os.path.join(
-                            self.temp_dir, f"{os.path.basename(icon_path)}"
-                        )
+                image_paths = [
+                    path
+                    for path in file_paths
+                    if path.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp"))
+                ]
 
-                        copyfile(original_path, copy_path)
+                self.import_image(image_paths)
 
-                        # create the item
-                        scaled_pixmap = QtGui.QPixmap(copy_path).scaled(
-                            self.texture_size,
-                            self.texture_size,
-                            QtCore.Qt.KeepAspectRatio,
-                        )
-                        scaled_icon = QtGui.QIcon(scaled_pixmap)
-
-                        item = QListWidgetItem(scaled_icon, texture)
-                        item.setData(QtCore.Qt.UserRole, copy_path)
-                        item.setData(QtCore.Qt.UserRole + 1, flip_list[i] == "True")
-                        item.setData(QtCore.Qt.UserRole + 2, mirror_list[i] == "True")
-
-                        # apply the mirroring
-                        transform = QtGui.QTransform()
-                        transform.scale(
-                            -1 if mirror_list[i] == "True" else 1,
-                            -1 if flip_list[i] == "True" else 1,
-                        )
-                        pixmap = scaled_pixmap.transformed(transform)
-                        item.setIcon(QtGui.QIcon(pixmap))
-
-                        self.lw_textures.addItem(item)
-
-            self.history.new_change(self.get_list_state())
         except Exception as e:
-            print(f"[paste_item] {e}")
+            print(f"[paste_item] Error: {e}")
 
     def get_list_state(self):
         try:
