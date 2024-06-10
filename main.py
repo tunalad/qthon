@@ -137,6 +137,12 @@ class MainWindow(QMainWindow):
         self.actionSave_Selections_As.triggered.connect(
             lambda: self.save_wad(save_as=True, selected_only=True)
         )
+        self.actionExport_Images.triggered.connect(
+            lambda: self.save_wad(export_images=True)
+        )
+        self.actionExport_Selected_Images.triggered.connect(
+            lambda: self.save_wad(selected_only=True, export_images=True)
+        )
 
         self.actionView_Detailed.triggered.connect(lambda: self.preview_texture())
         self.actionView_Animated.triggered.connect(lambda: self.preview_texture(True))
@@ -548,11 +554,17 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"[import_image] {e}")
 
-    def save_wad(self, save_as=False, selected_only=False):
+    def save_wad(self, save_as=False, selected_only=False, export_images=False):
         try:
+            export_path = None
+
             if not self.wad_path or save_as:
                 self.wad_path, _ = QFileDialog.getSaveFileName(
                     self, "Save WAD file", "", "WAD Files (*.wad);;All Files (*)"
+                )
+            elif export_images:
+                export_path = QFileDialog.getExistingDirectory(
+                    self, "Select export directory"
                 )
 
             if self.wad_path:
@@ -566,7 +578,14 @@ class MainWindow(QMainWindow):
                         item = self.lw_textures.item(t)
                         textures_list.append(item.data(QtCore.Qt.UserRole))
 
-                wadup(textures_list, self.wad_path)
+                if export_images:
+                    for t in textures_list:
+                        file_name = os.path.basename(t)
+                        destination_path = os.path.join(export_path, file_name)
+                        copyfile(t, destination_path)
+                else:
+                    wadup(textures_list, self.wad_path)
+
                 self.save_pos = self.history.position
 
         except Exception as e:

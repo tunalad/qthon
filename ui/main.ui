@@ -129,6 +129,9 @@
     <addaction name="actionSave_As"/>
     <addaction name="actionSave_Selections_As"/>
     <addaction name="separator"/>
+    <addaction name="actionExport_Images"/>
+    <addaction name="actionExport_Selected_Images"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -749,6 +752,16 @@
   <action name="actionSave_Selections_As">
    <property name="text">
     <string>Save Selections As...</string>
+   </property>
+  </action>
+  <action name="actionExport_Images">
+   <property name="text">
+    <string>Export Images</string>
+   </property>
+  </action>
+  <action name="actionExport_Selected_Images">
+   <property name="text">
+    <string>Export Selected As Images</string>
    </property>
   </action>
  </widget>
