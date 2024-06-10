@@ -134,6 +134,9 @@ class MainWindow(QMainWindow):
 
         self.actionSave.triggered.connect(lambda: self.save_wad())
         self.actionSave_As.triggered.connect(lambda: self.save_wad(save_as=True))
+        self.actionSave_Selections_As.triggered.connect(
+            lambda: self.save_wad(save_as=True, selected_only=True)
+        )
 
         self.actionView_Detailed.triggered.connect(lambda: self.preview_texture())
         self.actionView_Animated.triggered.connect(lambda: self.preview_texture(True))
@@ -545,7 +548,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"[import_image] {e}")
 
-    def save_wad(self, save_as=False):
+    def save_wad(self, save_as=False, selected_only=False):
         try:
             if not self.wad_path or save_as:
                 self.wad_path, _ = QFileDialog.getSaveFileName(
@@ -555,9 +558,13 @@ class MainWindow(QMainWindow):
             if self.wad_path:
                 # show items
                 textures_list = []
-                for t in range(self.lw_textures.count()):
-                    item = self.lw_textures.item(t)
-                    textures_list.append(item.data(QtCore.Qt.UserRole))
+                if selected_only:
+                    for t in self.lw_textures.selectedItems():
+                        textures_list.append(t.data(QtCore.Qt.UserRole))
+                else:
+                    for t in range(self.lw_textures.count()):
+                        item = self.lw_textures.item(t)
+                        textures_list.append(item.data(QtCore.Qt.UserRole))
 
                 wadup(textures_list, self.wad_path)
                 self.save_pos = self.history.position
