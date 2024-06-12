@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import (
     QWidget,
     QSpacerItem,
     QSizePolicy,
+    QMenu,
 )
 
 from RenameWindow import RenameWindow
@@ -83,7 +84,6 @@ class MainWindow(QMainWindow):
             True,
         )
         #####################################
-
         # TOGGLABLE ITEMS
         togglable_actions = [  # EXACTLY 1 selection
             self.actionRename,
@@ -175,6 +175,11 @@ class MainWindow(QMainWindow):
             )
         )
 
+        self.lw_textures.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.lw_textures.customContextMenuRequested.connect(
+            lambda pos: self.right_click_menu(pos)
+        )
+
         self.open_recent()
 
         ### togglable items when we selected EXACTLY 1 item
@@ -256,6 +261,14 @@ class MainWindow(QMainWindow):
     # # # # # # # # # # # #
     # FUNCTIONS
     # # # # # # # # # # # #
+
+    def right_click_menu(self, position):
+        global_position = self.lw_textures.viewport().mapToGlobal(position)
+
+        menu = self.findChild(QMenu, "menuEdit")
+
+        if menu:
+            menu.exec_(global_position)
 
     def preferences_handling(self):
         try:
