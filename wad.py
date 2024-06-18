@@ -176,22 +176,26 @@ def import_texture(images, temp_dir):
         x, y = img.size
 
         # make sure we can divide the size by 16
-        if x % 16 == 0 and y % 16 == 0 and max(x, y) <= 512:
-            new_width, new_height = x, y
-        else:
-            # use the closest sizes dividable by 16
-            new_width = (x // 16) * 16
-            new_height = (y // 16) * 16
+        new_width = (x // 16) * 16
+        new_height = (y // 16) * 16
 
-            # max size 512
-            if max(new_width, new_height) > 512:
-                ratio = 512 / max(new_width, new_height)
-                new_width = int(new_width * ratio)
-                new_height = int(new_height * ratio)
+        # if resizing made any dimension 0, set it to minimum 16
+        new_width = max(new_width, 16)
+        new_height = max(new_height, 16)
 
-            # resize if needed
-            if x != new_width or y != new_height:
-                img = img.resize((new_width, new_height))
+        # max size 512 while preserving aspect ratio
+        if max(new_width, new_height) > 512:
+            ratio = 512 / max(new_width, new_height)
+            new_width = int(new_width * ratio)
+            new_height = int(new_height * ratio)
+
+            # ensure dimensions are still multiples of 16
+            new_width = (new_width // 16) * 16
+            new_height = (new_height // 16) * 16
+
+        # resize if needed
+        if x != new_width or y != new_height:
+            img = img.resize((new_width, new_height), Image.LANCZOS)
 
         img = img.convert("RGB")
         img = img.quantize(palette=palette_image)
