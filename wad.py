@@ -161,6 +161,20 @@ def flip_texture(texture_path, mirror=False):
     img.close()
 
 
+def rotate_texture(texture_path, to_right=False):
+    img = Image.open(texture_path)
+
+    if to_right:
+        rotated = img.rotate(-90)
+    else:
+        rotated = img.rotate(90)
+
+    rotated.save(texture_path)
+
+    rotated.close()
+    img.close()
+
+
 def import_texture(images, temp_dir):
     # quake palette
     palette = []

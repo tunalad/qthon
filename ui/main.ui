@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>657</width>
-    <height>348</height>
+    <height>354</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -179,6 +179,13 @@
      <addaction name="action_Ascending"/>
      <addaction name="action_Descending"/>
     </widget>
+    <widget class="QMenu" name="menuRotate_Textures">
+     <property name="title">
+      <string>Rotate Te&amp;xtures</string>
+     </property>
+     <addaction name="actionRotate_Left"/>
+     <addaction name="actionRotate_Right"/>
+    </widget>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
@@ -191,6 +198,7 @@
     <addaction name="actionDeselect_All"/>
     <addaction name="separator"/>
     <addaction name="menu_Sort_Items"/>
+    <addaction name="menuRotate_Textures"/>
     <addaction name="separator"/>
     <addaction name="actionDefullbright"/>
     <addaction name="actionRename"/>
@@ -251,6 +259,8 @@
    <addaction name="actionRename"/>
    <addaction name="actionFlip"/>
    <addaction name="actionMirror"/>
+   <addaction name="actionRotate_Left"/>
+   <addaction name="actionRotate_Right"/>
    <addaction name="separator"/>
    <addaction name="actionView_Detailed"/>
    <addaction name="actionView_Animated"/>
@@ -516,7 +526,7 @@
      <normaloff>:/icons/fugue-icons/document-rename.png</normaloff>:/icons/fugue-icons/document-rename.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Rename</string>
+    <string>R&amp;ename</string>
    </property>
    <property name="toolTip">
     <string>Rename (F2)</string>
@@ -762,6 +772,41 @@
   <action name="actionExport_Selected_Images">
    <property name="text">
     <string>Export Selected As Images</string>
+   </property>
+  </action>
+  <action name="actionRotate_Left">
+   <property name="icon">
+    <iconset resource="fugue_icons.qrc">
+     <normaloff>:/icons/fugue-icons/arrow-circle-225-left.png</normaloff>:/icons/fugue-icons/arrow-circle-225-left.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate &amp;Left</string>
+   </property>
+   <property name="toolTip">
+    <string>Rotate Left</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionRotate_Right">
+   <property name="icon">
+    <iconset resource="fugue_icons.qrc">
+     <normaloff>:/icons/fugue-icons/arrow-circle-315.png</normaloff>:/icons/fugue-icons/arrow-circle-315.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate &amp;Right</string>
+   </property>
+   <property name="toolTip">
+    <string>Rotate Right</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionasd_3">
+   <property name="text">
+    <string>asd</string>
    </property>
   </action>
  </widget>

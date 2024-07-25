@@ -37,7 +37,7 @@ from WaterWindow import LiquidPreview
 from PreferencesWindow import PreferencesWindow
 
 import history, settings
-from wad import unwad, wadup, flip_texture, import_texture, defullbright
+from wad import unwad, wadup, flip_texture, rotate_texture, import_texture, defullbright
 
 
 class MainWindow(QMainWindow):
@@ -97,6 +97,8 @@ class MainWindow(QMainWindow):
             self.actionCopy,
             self.actionDelete,
             self.actionDefullbright,
+            self.actionRotate_Left,
+            self.actionRotate_Right,
         ]
 
         # first, we disable them
@@ -126,6 +128,12 @@ class MainWindow(QMainWindow):
         self.actionFlip.triggered.connect(lambda: self.flip_texture(mirror=False))
         self.actionMirror.triggered.connect(lambda: self.flip_texture(mirror=True))
         self.actionDefullbright.triggered.connect(lambda: self.defullbright_textures())
+        self.actionRotate_Left.triggered.connect(
+            lambda: self.rotate_texture(to_right=False)
+        )
+        self.actionRotate_Right.triggered.connect(
+            lambda: self.rotate_texture(to_right=True)
+        )
 
         self.action_Ascending.triggered.connect(lambda: self.sort_textures(False))
         self.action_Descending.triggered.connect(lambda: self.sort_textures(True))
@@ -739,6 +747,34 @@ class MainWindow(QMainWindow):
             self.history.new_change(self.get_list_state())
         except Exception as e:
             print(f"[flip_texture] {e}")
+
+    def rotate_texture(self, to_right):
+        try:
+            selected_items = self.lw_textures.selectedItems()
+
+            if len(selected_items) < 1:
+                print("nothing is selected buckoo")
+                return
+
+            for item in selected_items:
+                icon_path = item.data(QtCore.Qt.UserRole)
+
+                if to_right:  # rotate to right
+                    rotate_texture(icon_path, True)
+                else:  # to left
+                    rotate_texture(icon_path, False)
+
+                original_pixmap = QtGui.QPixmap(icon_path)
+                scaled_pixmap = original_pixmap.scaled(
+                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
+                )
+
+                item.setIcon(QtGui.QIcon(scaled_pixmap))
+                item.setData(QtCore.Qt.UserRole, icon_path)
+
+            self.history.new_change(self.get_list_state())
+        except Exception as e:
+            print(f"[rotate_texture] {e}")
 
     def de_select_all(self, toggle):
         try:
