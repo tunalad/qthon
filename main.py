@@ -37,7 +37,15 @@ from WaterWindow import LiquidPreview
 from PreferencesWindow import PreferencesWindow
 
 import history, settings
-from wad import unwad, wadup, flip_texture, rotate_texture, import_texture, defullbright
+from wad import (
+    unwad,
+    wadup,
+    flip_texture,
+    rotate_texture,
+    import_texture,
+    defullbright,
+    get_texture_size,
+)
 
 
 class MainWindow(QMainWindow):
@@ -203,6 +211,9 @@ class MainWindow(QMainWindow):
         ### disable detailed & animation preview
         self.disable_previews()
         self.lw_textures.itemSelectionChanged.connect(lambda: self.disable_previews())
+
+        # toggle statusbar info
+        self.lw_textures.itemSelectionChanged.connect(lambda: self.statusbar_text())
 
         # TOGGLING BARS
         self.bars_manager(self.statusbar, self.actionHide_statusbar)
@@ -694,6 +705,26 @@ class MainWindow(QMainWindow):
                 self.actionView_Animated.setEnabled(True)
         except Exception as e:
             print(f"[disable_previews] {e}")
+
+    def statusbar_text(self):
+        try:
+            selected_items = self.lw_textures.selectedItems()
+
+            if len(selected_items) < 1:
+                self.statusbar.clearMessage()
+                return
+
+            if len(selected_items) > 1:
+                self.statusbar.showMessage(
+                    f"Selected items: {len(selected_items)}/{self.lw_textures.count()}"
+                )
+            else:
+                texture = selected_items[0]
+                self.statusbar.showMessage(
+                    f"{texture.text()} | {get_texture_size(texture.data(QtCore.Qt.UserRole))}"
+                )
+        except Exception as e:
+            print(f"[statusbar_text] {e}")
 
     def sort_textures(self, descending=False):
         try:

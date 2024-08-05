@@ -265,6 +265,11 @@ def defullbright(images):
     return new_paths
 
 
+def get_texture_size(image_path):
+    with Image.open(image_path) as img:
+        return img.size
+
+
 def main():
     # unwaded = unwad("catacomb.wad")
     # pprint(unwaded)
