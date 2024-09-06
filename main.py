@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
             [
                 # self.action,
                 # HELP
-                self.actionHelp,
+                # self.actionHelp,
             ],
             True,
         )
@@ -116,6 +116,11 @@ class MainWindow(QMainWindow):
         # CONNECTIONS
         ## trigger
         self.actionAbout.triggered.connect(lambda: AboutWindow().exec_())
+        self.actionHelp.triggered.connect(
+            lambda: QtGui.QDesktopServices.openUrl(
+                QtCore.QUrl("https://tunalad.github.io/projects/qthon/")
+            )
+        )
         self.actionPreferences.triggered.connect(lambda: self.preferences_handling())
         self.actionQuit.triggered.connect(lambda: self.close())
 

@@ -401,7 +401,7 @@
      <normaloff>:/icons/fugue-icons/book-question.png</normaloff>:/icons/fugue-icons/book-question.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Manual</string>
+    <string>Quick &amp;Guide</string>
    </property>
    <property name="shortcut">
     <string>F1</string>
@@ -760,6 +760,9 @@
    </property>
    <property name="text">
     <string>De-&amp;fullbright</string>
+   </property>
+   <property name="toolTip">
+    <string>De-fullbright (Ctrl+L)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>
