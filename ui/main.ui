@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>657</width>
-    <height>354</height>
+    <height>394</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -261,6 +261,8 @@
    <addaction name="actionMirror"/>
    <addaction name="actionRotate_Left"/>
    <addaction name="actionRotate_Right"/>
+   <addaction name="separator"/>
+   <addaction name="actionDefullbright"/>
    <addaction name="separator"/>
    <addaction name="actionView_Detailed"/>
    <addaction name="actionView_Animated"/>
@@ -752,11 +754,18 @@
    </property>
   </action>
   <action name="actionDefullbright">
+   <property name="icon">
+    <iconset resource="fugue_icons.qrc">
+     <normaloff>:/icons/fugue-icons/light-bulb-off.png</normaloff>:/icons/fugue-icons/light-bulb-off.png</iconset>
+   </property>
    <property name="text">
     <string>De-&amp;fullbright</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionSave_Selections_As">
