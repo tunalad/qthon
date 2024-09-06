@@ -7,4 +7,4 @@ from PyQt5.QtWidgets import (
 class AboutWindow(QDialog):
     def __init__(self):
         super(AboutWindow, self).__init__()
-        uic.loadUi("ui/about.ui", self)
+        uic.loadUi("assets/ui/about.ui", self)

@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
 class PreferencesWindow(QDialog):
     def __init__(self, settings):
         super().__init__()
-        uic.loadUi("ui/preferences.ui", self)
+        uic.loadUi("assets/ui/preferences.ui", self)
 
         self.settings = settings
         self.cfg = self.settings.parsed_cfg

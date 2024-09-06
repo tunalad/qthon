@@ -125,7 +125,7 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="fugue_icons.qrc"/>
+  <include location="../fugue_icons.qrc"/>
  </resources>
  <connections/>
 </ui>

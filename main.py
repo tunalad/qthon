@@ -9,7 +9,7 @@
 # pylint: disable=unnecessary-lambda
 
 import sys, os, tempfile
-import ui.resource_ui
+import assets.ui.resource_ui
 from shutil import rmtree, copyfile
 from appdirs import user_data_dir
 from PyQt5 import uic, QtGui, QtCore
@@ -36,8 +36,8 @@ from PreviewWindow import PreviewWindow
 from WaterWindow import LiquidPreview
 from PreferencesWindow import PreferencesWindow
 
-import history, settings
-from wad import (
+from utils import history, settings
+from utils.wad import (
     unwad,
     wadup,
     flip_texture,
@@ -51,7 +51,7 @@ from wad import (
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        uic.loadUi("ui/main.ui", self)
+        uic.loadUi("assets/ui/main.ui", self)
 
         self.setAcceptDrops(True)
 

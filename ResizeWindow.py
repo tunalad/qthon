@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
 class ResizeWindow(QDialog):
     def __init__(self, textures):
         super().__init__()
-        uic.loadUi("ui/resize.ui", self)
+        uic.loadUi("assets/ui/resize.ui", self)
 
         self.textures = textures
         self.x, self.y = Image.open(textures[0]["path"]).size

@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
 class RenameWindow(QDialog):
     def __init__(self, texture_title, texture_path):
         super(RenameWindow, self).__init__()
-        uic.loadUi("ui/rename.ui", self)
+        uic.loadUi("assets/ui/rename.ui", self)
         # yes, I'd rather create a whole .ui file than code out 2 items widget
 
         self.title = texture_title
