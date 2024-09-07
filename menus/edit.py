@@ -21,8 +21,8 @@ from utils.wad import (
     defullbright,
 )
 
-from RenameWindow import RenameWindow
-from ResizeWindow import ResizeWindow
+from windows.RenameWindow import RenameWindow
+from windows.ResizeWindow import ResizeWindow
 
 
 class EditMixin:

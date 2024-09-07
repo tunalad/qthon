@@ -31,7 +31,7 @@ from menus.file import FileMixin
 from menus.edit import EditMixin
 from menus.view import ViewMixin
 
-from AboutWindow import AboutWindow
+from windows.AboutWindow import AboutWindow
 
 
 class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):

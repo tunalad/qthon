@@ -13,9 +13,9 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 
-from PreviewWindow import PreviewWindow
-from WaterWindow import LiquidPreview
-from PreferencesWindow import PreferencesWindow
+from windows.PreviewWindow import PreviewWindow
+from windows.WaterWindow import LiquidPreview
+from windows.PreferencesWindow import PreferencesWindow
 
 
 class ViewMixin:
