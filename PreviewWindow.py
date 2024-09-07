@@ -1,6 +1,6 @@
-import os, sys
+import os
 
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QMessageBox
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import QTimer, Qt
 from PIL import Image

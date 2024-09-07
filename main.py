@@ -9,46 +9,29 @@
 # pylint: disable=unnecessary-lambda
 
 import sys, os, tempfile
-import assets.ui.resource_ui
-from shutil import rmtree, copyfile
+from shutil import rmtree
 from appdirs import user_data_dir
 from PyQt5 import uic, QtGui, QtCore
 from PyQt5.QtWidgets import (
     QMainWindow,
     QApplication,
-    QDialog,
     QListWidgetItem,
-    QFileDialog,
-    QListView,
-    QMessageBox,
-    QAction,
     QLineEdit,
     QWidget,
-    QSpacerItem,
     QSizePolicy,
     QMenu,
 )
 
-from RenameWindow import RenameWindow
-from ResizeWindow import ResizeWindow
-from AboutWindow import AboutWindow
-from PreviewWindow import PreviewWindow
-from WaterWindow import LiquidPreview
-from PreferencesWindow import PreferencesWindow
-
 from utils import history, settings
 from utils.wad import (
-    unwad,
-    wadup,
-    flip_texture,
-    rotate_texture,
-    import_texture,
-    defullbright,
     get_texture_size,
 )
+from menus.file import FileMixin
+from menus.edit import EditMixin
+from menus.view import ViewMixin
 
 
-class MainWindow(QMainWindow):
+class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
     def __init__(self):
         super(MainWindow, self).__init__()
         uic.loadUi("assets/ui/main.ui", self)
@@ -294,20 +277,6 @@ class MainWindow(QMainWindow):
         if menu:
             menu.exec_(global_position)
 
-    def preferences_handling(self):
-        try:
-            PreferencesWindow(settings=self.settings).exec_()
-            self.load_config()
-            self.bars_manager(self.statusbar, self.actionHide_statusbar)
-            self.bars_manager(
-                self.tb_options, self.actionHide_toolbar, self.actionMovable_toolbar
-            )
-            self.bars_manager(
-                self.tb_editor, self.actionHide_sidebar, self.actionMovable_sidebar
-            )
-        except Exception as e:
-            print(f"[preferences_handling] {e}")
-
     def load_config(self):
         try:
             cfg = self.settings.parsed_cfg
@@ -375,25 +344,6 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"[title_management] {e}")
 
-    def bars_manager(self, widget, action, movable_action=None):
-        try:
-            if action:
-                widget.setVisible(not action.isChecked())
-                action.triggered.connect(
-                    lambda: widget.setVisible(not action.isChecked())
-                )
-            else:
-                print(f"can't find action: {widget.objectName()}")
-
-            if movable_action:
-                widget.setMovable(movable_action.isChecked())
-                movable_action.setChecked(widget.isMovable())
-                movable_action.triggered.connect(
-                    lambda: widget.setMovable(movable_action.isChecked())
-                )
-        except Exception as e:
-            print(f"[bars_manager] {e}")
-
     def adjust_zoom(self, zoom_type):
         try:
             if zoom_type == "in" and self.texture_size < 128:
@@ -408,274 +358,6 @@ class MainWindow(QMainWindow):
             )
         except Exception as e:
             print(f"[adjust_zoom] {e}")
-
-    def preview_texture(self, animation=False):
-        try:
-            selected_items = self.lw_textures.selectedItems()
-
-            if len(selected_items) != 1:
-                print("can't preview 0 or more than 1 textures")
-                QMessageBox.warning(
-                    self, "Qthon Error", "Can't preview multiple or no textures."
-                )
-                return
-
-            item = {
-                "title": selected_items[0].text(),
-                "path": selected_items[0].data(QtCore.Qt.UserRole),
-            }
-            if os.path.basename(item["path"]).startswith("*") and animation:
-                LiquidPreview(texture=item["path"], port=9742).exec()
-            else:
-                PreviewWindow(item["path"], 200, animation).exec_()
-        except Exception as e:
-            print(f"[preview_texture] {e}")
-
-    def new_wad(self):
-        try:
-            if self.temp_dir:
-                rmtree(self.temp_dir)
-                self.lw_textures.clear()
-
-            self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
-            self.history.set_temp_dir(self.temp_dir)
-            self.history.new_change(self.get_list_state())  # empty snap
-
-            self.wad_path = None
-        except Exception as e:
-            print(f"[new_wad] {e}")
-
-    def open_recent(self, new_path=None):
-        try:
-            recent_files = os.path.join(self.user_data_dir, "recent_files")
-
-            self.menuOpen_Recent.clear()
-
-            # remove line if it's already in the list
-            with open(recent_files, "r+") as file:
-                lines = file.readlines()
-                file.seek(0)
-                file.truncate()
-                for line in lines:
-                    if line.strip("\n") != new_path:
-                        file.write(line)
-
-            # add new path to list
-            if new_path:
-                with open(recent_files, "a") as file:
-                    file.write(new_path + "\n")
-
-            # create menu items
-            if os.path.exists(recent_files):
-                # trim so we don't have > 10
-                with open(recent_files, "r+") as file:
-                    lines = file.readlines()
-                    if len(lines) > 10:
-                        file.seek(0)
-                        file.truncate()
-                        file.writelines(lines[-10:])
-
-                # create menu items
-                with open(recent_files, "r") as file:
-                    paths = reversed(file.readlines())
-
-                    for p in paths:
-                        p = p.strip()
-                        if os.path.exists(p) and os.path.isfile(p):
-                            action = QAction(p, self)
-                            action.triggered.connect(
-                                lambda checked, path=p: self.open_wad(path)
-                            )
-                            self.menuOpen_Recent.addAction(action)
-
-                self.menuOpen_Recent.setEnabled(len(self.menuOpen_Recent.actions()) > 0)
-        except Exception as e:
-            print(f"[open_recent] {e}")
-
-    def open_wad(self, wad_path=None):
-        try:
-            if not wad_path:
-                self.wad_path, _ = QFileDialog.getOpenFileName(
-                    self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
-                )
-            else:
-                self.wad_path = wad_path
-
-            if not self.wad_path:
-                return
-
-            if self.temp_dir:
-                rmtree(self.temp_dir)
-
-            self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
-            self.history.set_temp_dir(self.temp_dir)
-            self.history.reset_state()
-
-            self.lw_textures.clear()
-            self.import_wad([self.wad_path])
-            self.save_pos = self.history.position
-
-            self.open_recent(self.wad_path)
-        except Exception as e:
-            print(f"[open_wad] {e}")
-
-    def import_wads_images(self, dropped_files=None):
-        try:
-            if dropped_files:
-                import_paths = dropped_files
-            else:
-                import_paths, _ = QFileDialog.getOpenFileNames(
-                    self,
-                    "Import file(s)",
-                    "",
-                    "WAD Files (*.wad);;Images (*.png *.jpg *.jpeg);;All files (*)",
-                )
-
-            wad_paths = []
-            image_paths = []
-            extra_paths = []
-
-            for path in import_paths:
-                if path.lower().endswith(".wad"):
-                    wad_paths.append(path)
-                elif path.lower().endswith((".png", ".jpg", ".jpeg")):
-                    image_paths.append(path)
-                else:
-                    extra_paths.append(path)
-
-            self.import_wad(wad_paths)
-            self.import_image(image_paths)
-
-            if len(extra_paths) > 0:
-                QMessageBox.warning(
-                    self,
-                    "Qthon Warning",
-                    f"Some files selected can't be imported:\n    - {'\n    - '.join(os.path.basename(p) for p in extra_paths)}",
-                )
-        except Exception as e:
-            print(f"[import_wads_images] {e}")
-
-    def import_wad(self, wad_paths):
-        try:
-            if len(wad_paths) < 1:
-                return
-
-            for wad in wad_paths:
-                self.unpack_wad(wad)
-
-            self.history.new_change(self.get_list_state())
-        except Exception as e:
-            print(f"[import_wad] {e}")
-
-    def import_image(self, images):
-        try:
-            textures = import_texture(images, self.temp_dir)
-            # __import__('pprint').pprint(imported_textures)
-
-            if len(textures) < 1:
-                return
-
-            for t in textures:
-                scaled_pixmap = QtGui.QPixmap(t).scaled(
-                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
-                )
-
-                scaled_icon = QtGui.QIcon(scaled_pixmap)
-                item = QListWidgetItem(
-                    scaled_icon, os.path.splitext(os.path.basename(t))[0]
-                )
-
-                item.setData(QtCore.Qt.UserRole, t)  # icon path
-
-                self.lw_textures.addItem(item)
-
-            self.history.new_change(self.get_list_state())
-        except Exception as e:
-            print(f"[import_image] {e}")
-
-    def save_wad(self, save_as=False, selected_only=False, export_images=False):
-        try:
-            export_path = None
-
-            if not self.wad_path or save_as:
-                self.wad_path, _ = QFileDialog.getSaveFileName(
-                    self, "Save WAD file", "", "WAD Files (*.wad);;All Files (*)"
-                )
-            elif export_images:
-                export_path = QFileDialog.getExistingDirectory(
-                    self, "Select export directory"
-                )
-
-            if self.wad_path:
-                # show items
-                textures_list = []
-                if selected_only:
-                    for t in self.lw_textures.selectedItems():
-                        textures_list.append(t.data(QtCore.Qt.UserRole))
-                else:
-                    for t in range(self.lw_textures.count()):
-                        item = self.lw_textures.item(t)
-                        textures_list.append(item.data(QtCore.Qt.UserRole))
-
-                if export_images:
-                    for t in textures_list:
-                        file_name = os.path.basename(t)
-                        destination_path = os.path.join(export_path, file_name)
-                        copyfile(t, destination_path)
-                else:
-                    wadup(textures_list, self.wad_path)
-
-                self.save_pos = self.history.position
-
-        except Exception as e:
-            print(f"[save_wad] {e}")
-
-    def unpack_wad(self, path):
-        try:
-            unwadded = unwad(path, self.temp_dir)
-            temp_dir = unwadded[0]
-            textures = unwadded[1]
-
-            for t in textures:
-                scaled_pixmap = QtGui.QPixmap(f"{temp_dir}/{t}").scaled(
-                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
-                )
-
-                scaled_icon = QtGui.QIcon(scaled_pixmap)
-                item = QListWidgetItem(scaled_icon, str(t))
-
-                item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}.png")  # icon path
-
-                self.lw_textures.addItem(item)
-        except Exception as e:
-            print(f"[unpack_wad] {e}")
-
-    def defullbright_textures(self):
-        try:
-            textures = []
-
-            for i in self.lw_textures.selectedItems():
-                textures.append(i.data(QtCore.Qt.UserRole))
-
-            dfb_textures = defullbright(textures)
-
-            for t in dfb_textures:
-                filename = os.path.splitext(os.path.basename(t))[0]
-
-                scaled_pixmap = QtGui.QPixmap(t).scaled(
-                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
-                )
-
-                scaled_icon = QtGui.QIcon(scaled_pixmap)
-                item = QListWidgetItem(scaled_icon, filename)
-
-                item.setData(QtCore.Qt.UserRole, t)  # icon path
-
-                self.lw_textures.addItem(item)
-
-            self.history.new_change(self.get_list_state())
-        except Exception as e:
-            print(f"[defullbright_textures] {e}")
 
     def disable_actions(self, actions, not_implemented=False):
         try:
@@ -731,234 +413,6 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"[statusbar_text] {e}")
 
-    def sort_textures(self, descending=False):
-        try:
-            sort_order = QtCore.Qt.AscendingOrder
-
-            if descending:
-                sort_order = QtCore.Qt.DescendingOrder
-
-            self.lw_textures.sortItems(sort_order)
-
-            self.history.new_change(self.get_list_state())
-        except Exception as e:
-            print(f"[sort_textures] {e}")
-
-    def delete_textures(self):
-        try:
-            print("we deleting stuff")
-            textures = self.lw_textures.selectedItems()
-            for t in textures:
-                self.lw_textures.takeItem(self.lw_textures.row(t))
-                os.remove(t.data(QtCore.Qt.UserRole))
-
-            self.history.new_change(self.get_list_state())
-        except Exception as e:
-            print(f"[delete_textures] {e}")
-
-    def flip_texture(self, mirror=False):
-        try:
-            selected_items = self.lw_textures.selectedItems()
-
-            if len(selected_items) < 1:
-                print("nothing is selected buckoo")
-                return
-
-            for item in selected_items:
-                icon_path = item.data(QtCore.Qt.UserRole)
-
-                if mirror:  # horizontally (mirrored)
-                    flip_texture(icon_path, True)
-                else:  # vertically (flipped)
-                    flip_texture(icon_path, False)
-
-                original_pixmap = QtGui.QPixmap(icon_path)
-                scaled_pixmap = original_pixmap.scaled(
-                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
-                )
-
-                item.setIcon(QtGui.QIcon(scaled_pixmap))
-                item.setData(QtCore.Qt.UserRole, icon_path)
-
-            self.history.new_change(self.get_list_state())
-        except Exception as e:
-            print(f"[flip_texture] {e}")
-
-    def rotate_texture(self, to_right):
-        try:
-            selected_items = self.lw_textures.selectedItems()
-
-            if len(selected_items) < 1:
-                print("nothing is selected buckoo")
-                return
-
-            for item in selected_items:
-                icon_path = item.data(QtCore.Qt.UserRole)
-
-                if to_right:  # rotate to right
-                    rotate_texture(icon_path, True)
-                else:  # to left
-                    rotate_texture(icon_path, False)
-
-                original_pixmap = QtGui.QPixmap(icon_path)
-                scaled_pixmap = original_pixmap.scaled(
-                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
-                )
-
-                item.setIcon(QtGui.QIcon(scaled_pixmap))
-                item.setData(QtCore.Qt.UserRole, icon_path)
-
-            self.history.new_change(self.get_list_state())
-        except Exception as e:
-            print(f"[rotate_texture] {e}")
-
-    def de_select_all(self, toggle):
-        try:
-            for i in range(self.lw_textures.count()):
-                self.lw_textures.item(i).setSelected(toggle)
-        except Exception as e:
-            print(f"[de_select_all] {e}")
-
-    def rename_texture(self):
-        try:
-            selected_items = self.lw_textures.selectedItems()
-
-            if len(selected_items) != 1:
-                print("can't rename 0 or more than 1 files")
-                QMessageBox.warning(
-                    self, "Qthon Error", "Can't rename multiple or no textures."
-                )
-                return
-
-            item = {
-                "title": selected_items[0].text(),
-                "path": selected_items[0].data(QtCore.Qt.UserRole),
-            }
-
-            rename_win = RenameWindow(item["title"], item["path"])
-
-            if rename_win.exec_():
-                new_name = rename_win.get_new_name()
-                existing_items = self.lw_textures.findItems(
-                    new_name, QtCore.Qt.MatchExactly
-                )
-
-                if existing_items and existing_items[0] != selected_items[0]:
-                    print("item already exists bucko")
-                    QMessageBox.warning(
-                        self, "Qthon Error", "Texture with this name already exists."
-                    )
-                    return
-
-                os.rename(item["path"], f"{self.temp_dir}/{new_name}.png")
-
-                selected_items[0].setText(new_name)
-                selected_items[0].setData(
-                    QtCore.Qt.UserRole, f"{self.temp_dir}/{new_name}.png"
-                )
-                self.history.new_change(self.get_list_state())
-        except Exception as e:
-            print(f"[rename_texture] {e}")
-
-    def resize_texture(self):
-        try:
-            selected_items = self.lw_textures.selectedItems()
-            textures = []
-
-            if len(selected_items) < 1:
-                print("can't resize 0 files")
-                QMessageBox.warning(
-                    self, "Qthon Error", "No textures selected for resizing"
-                )
-                return
-
-            for i in selected_items:
-                textures.append({"title": i.text(), "path": i.data(QtCore.Qt.UserRole)})
-
-            resize_win = ResizeWindow(textures)
-
-            if resize_win.exec_():
-                print("do sth post texture(s) resizing idk")
-                self.history.new_change(self.get_list_state())
-                self.set_list_state()
-        except Exception as e:
-            print(f"[resize_texture] {e}")
-
-    def cut_copy_item(self, is_cut):
-        try:
-            clipboard = QApplication.clipboard()
-            mime_data = QtCore.QMimeData()
-            image_paths = []
-
-            selected_items = self.lw_textures.selectedItems()
-
-            rmtree(self.clipboard_temp_dir)
-            os.makedirs(self.clipboard_temp_dir, exist_ok=True)
-
-            for item in selected_items:
-                image_paths.append(item.data(QtCore.Qt.UserRole))
-
-            if image_paths:
-                # Initialize an empty list to hold all URLs
-                urls_to_copy = []
-                for image_path in image_paths:
-                    # Move the image to the clipboard folder
-                    new_path = os.path.join(
-                        self.clipboard_temp_dir, os.path.basename(image_path)
-                    )
-                    copyfile(image_path, new_path)
-
-                    # Add the new path as a URL to the urls_to_copy list
-                    urls_to_copy.append(QtCore.QUrl.fromLocalFile(new_path))
-
-                # Set all collected URLs to the clipboard at once
-                mime_data.setUrls(urls_to_copy)
-                clipboard.setMimeData(mime_data)
-
-                if is_cut:
-                    for item in selected_items:
-                        self.lw_textures.takeItem(self.lw_textures.row(item))
-                        os.remove(item.data(QtCore.Qt.UserRole))
-
-                    self.history.new_change(self.get_list_state())
-
-        except Exception as e:
-            print(f"[cut_copy_item] {e}")
-
-    def paste_item(self):
-        try:
-            clipboard = QApplication.clipboard()
-            mime_data = clipboard.mimeData()
-
-            # paste those images where you just copy directly from a page or whatever
-            if mime_data.hasImage():
-                image_data = mime_data.data("image/png")
-
-                pixmap = QtGui.QPixmap()
-                pixmap.loadFromData(image_data, "PNG")
-
-                pasted_dir = os.path.join(self.temp_dir, "pasted")
-                os.makedirs(pasted_dir, exist_ok=True)
-                temp_file_path = os.path.join(pasted_dir, "pasted_image.png")
-                pixmap.save(temp_file_path, "PNG")
-
-                self.import_image([temp_file_path])
-
-            # paste local images
-            elif mime_data.hasUrls():
-                file_paths = [url.toLocalFile() for url in mime_data.urls()]
-
-                image_paths = [
-                    path
-                    for path in file_paths
-                    if path.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp"))
-                ]
-
-                self.import_image(image_paths)
-
-        except Exception as e:
-            print(f"[paste_item] Error: {e}")
-
     def get_list_state(self):
         try:
             textures = self.lw_textures
@@ -1000,17 +454,6 @@ class MainWindow(QMainWindow):
                 self.lw_textures.addItem(item)
         except Exception as e:
             print(f"[set_list_state] {e}")
-
-    def undo_redo(self, redo=False):
-        try:
-            if redo:
-                self.history.redo()
-            else:
-                self.history.undo()
-
-            self.set_list_state()
-        except Exception as e:
-            print(f"[undo_redo] {e}")
 
     def active_on_selection(self, actions, multi=False):
         try:
