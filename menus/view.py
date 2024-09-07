@@ -13,6 +13,10 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 
+from PreviewWindow import PreviewWindow
+from WaterWindow import LiquidPreview
+from PreferencesWindow import PreferencesWindow
+
 
 class ViewMixin:
     def bars_manager(self, widget, action, movable_action=None):

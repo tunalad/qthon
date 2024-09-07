@@ -9,6 +9,7 @@
 # pylint: disable=unnecessary-lambda
 
 import sys, os, tempfile
+import assets.ui.resource_ui
 from shutil import rmtree
 from appdirs import user_data_dir
 from PyQt5 import uic, QtGui, QtCore
@@ -29,6 +30,8 @@ from utils.wad import (
 from menus.file import FileMixin
 from menus.edit import EditMixin
 from menus.view import ViewMixin
+
+from AboutWindow import AboutWindow
 
 
 class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):

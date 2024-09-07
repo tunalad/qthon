@@ -21,6 +21,9 @@ from utils.wad import (
     defullbright,
 )
 
+from RenameWindow import RenameWindow
+from ResizeWindow import ResizeWindow
+
 
 class EditMixin:
     def undo_redo(self, redo=False):
