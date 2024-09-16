@@ -9,4 +9,4 @@ from utils import path
 class AboutWindow(QDialog):
     def __init__(self):
         super(AboutWindow, self).__init__()
-        uic.loadUi(path("assets", "ui", "about.iu"), self)
+        uic.loadUi(path("assets", "ui", "about.ui"), self)
