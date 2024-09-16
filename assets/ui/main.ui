@@ -139,7 +139,9 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="actionHelp"/>
+    <addaction name="separator"/>
     <addaction name="actionAbout"/>
+    <addaction name="actionAbout_Qt"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -819,6 +821,11 @@
   <action name="actionasd_3">
    <property name="text">
     <string>asd</string>
+   </property>
+  </action>
+  <action name="actionAbout_Qt">
+   <property name="text">
+    <string>About &amp;Qt</string>
    </property>
   </action>
  </widget>

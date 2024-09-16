@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import (
     QWidget,
     QSizePolicy,
     QMenu,
+    QMessageBox,
 )
 
 from utils import history, settings, path
@@ -102,6 +103,9 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
         # CONNECTIONS
         ## trigger
         self.actionAbout.triggered.connect(lambda: AboutWindow().exec_())
+        self.actionAbout_Qt.triggered.connect(
+            lambda: QMessageBox.aboutQt(self, "About Qt")
+        )
         self.actionHelp.triggered.connect(
             lambda: QtGui.QDesktopServices.openUrl(
                 QtCore.QUrl("https://tunalad.github.io/projects/qthon/")
