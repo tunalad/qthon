@@ -1,3 +1,7 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=unnecessary-lambda
+# pylint: disable=invalid-name
 import toml
 
 from PyQt5 import uic
@@ -5,11 +9,13 @@ from PyQt5.QtWidgets import (
     QDialog,
 )
 
+from utils import path
+
 
 class PreferencesWindow(QDialog):
     def __init__(self, settings):
         super().__init__()
-        uic.loadUi("assets/ui/preferences.ui", self)
+        uic.loadUi(path("assets", "ui", "preferences.ui"), self)
 
         self.settings = settings
         self.cfg = self.settings.parsed_cfg

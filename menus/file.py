@@ -180,9 +180,7 @@ class FileMixin:
 
             if len(extra_paths) > 0:
                 QMessageBox.warning(
-                    self,
-                    "Qthon Warning",
-                    f"Some files selected can't be imported:\n    - {'\n    - '.join(os.path.basename(p) for p in extra_paths)}",
+                    self, "Qthon Warning", "Some files selected can't be imported."
                 )
         except Exception as e:
             print(f"[import_wads_images] {e}")

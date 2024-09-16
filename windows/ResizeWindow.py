@@ -1,3 +1,7 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=unnecessary-lambda
+# pylint: disable=invalid-name
 from PIL import Image
 
 from PyQt5 import uic
@@ -5,11 +9,13 @@ from PyQt5.QtWidgets import (
     QDialog,
 )
 
+from utils import path
+
 
 class ResizeWindow(QDialog):
     def __init__(self, textures):
         super().__init__()
-        uic.loadUi("assets/ui/resize.ui", self)
+        uic.loadUi(path("assets", "ui", "resize.ui"), self)
 
         self.textures = textures
         self.x, self.y = Image.open(textures[0]["path"]).size

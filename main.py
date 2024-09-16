@@ -23,7 +23,7 @@ from PyQt5.QtWidgets import (
     QMenu,
 )
 
-from utils import history, settings
+from utils import history, settings, path
 from utils.wad import (
     get_texture_size,
 )
@@ -37,7 +37,7 @@ from windows.AboutWindow import AboutWindow
 class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
     def __init__(self):
         super(MainWindow, self).__init__()
-        uic.loadUi("assets/ui/main.ui", self)
+        uic.loadUi(path("assets", "ui", "main.ui"), self)
 
         self.setAcceptDrops(True)
 
