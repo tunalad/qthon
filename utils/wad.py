@@ -176,6 +176,8 @@ def rotate_texture(texture_path, to_right=False):
 
 
 def import_texture(images, temp_dir):
+    has_alpha = False
+
     # quake palette
     palette = []
     for p in quake.palette:
@@ -211,10 +213,22 @@ def import_texture(images, temp_dir):
         if x != new_width or y != new_height:
             img = img.resize((new_width, new_height), Image.LANCZOS)
 
+        # handle transparency
+        if img.mode == "RGBA":
+            has_alpha = True
+            background = Image.new(
+                "RGBA", img.size, tuple(palette[-3:]) + (255,)
+            )  # RGB + alpha color
+            img = Image.alpha_composite(background, img)
+
         img = img.convert("RGB")
         img = img.quantize(palette=palette_image)
 
         base_name = os.path.splitext(os.path.basename(i))[0]
+
+        # alpha texture prefix
+        if has_alpha:
+            base_name = "{" + base_name
 
         # dealing with duplicate names
         index = 1
