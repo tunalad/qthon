@@ -249,12 +249,14 @@ def defullbright(images):
     full_palette = []
     for p in quake.palette:
         full_palette += p
-    reduced_palette = full_palette[: 224 * 3]  # remove fullbrights
 
-    palette_image = Image.frombytes("P", (224, 1), bytes(reduced_palette))
+    # removed fullbrights
+    reduced_palette = full_palette[: 224 * 3] + full_palette[-3:] 
+
+    palette_image = Image.frombytes("P", (225, 1), bytes(reduced_palette))
     palette_image.putpalette(
-        reduced_palette + [0] * (256 - 224) * 3
-    )  # pad to 256 colors with zero
+        reduced_palette + [0] * (256 - 225) * 3
+    )  # pad fullbright colors with zeros
 
     new_paths = []
     for img_path in images:
