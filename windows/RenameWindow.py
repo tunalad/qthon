@@ -12,7 +12,7 @@ from utils import path
 
 class RenameWindow(QDialog):
     def __init__(self, texture_title, texture_path):
-        super(RenameWindow, self).__init__()
+        super().__init__()
         uic.loadUi(path("assets", "ui", "rename.ui"), self)
         # yes, I'd rather create a whole .ui file than code out 2 items widget
 

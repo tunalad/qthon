@@ -1,3 +1,9 @@
+# pylint: disable=invalid-name
+# pylint: disable=too-few-public-methods
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-function-docstring
+# pylint: disable=too-many-locals
 import os
 
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel

@@ -1,10 +1,6 @@
-# pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
-# pylint: disable=redefined-outer-name
 # pylint: disable=multiple-imports
-# pylint: disable=missing-class-docstring
 # pylint: disable=broad-exception-caught
-# pylint: disable=too-few-public-methods
 # pylint: disable=unnecessary-lambda
 import os
 from shutil import rmtree, copyfile
@@ -26,7 +22,17 @@ from windows.ResizeWindow import ResizeWindow
 
 
 class EditMixin:
+    """
+    Mixin class providing edit functionality for texture manipulation.
+    """
+
     def undo_redo(self, redo=False):
+        """
+        Performs undo or redo operation on texture list state.
+
+        Args:
+            redo (bool): If True, performs redo. If False, performs undo.
+        """
         try:
             if redo:
                 self.history.redo()
@@ -38,6 +44,12 @@ class EditMixin:
             print(f"[undo_redo] {e}")
 
     def cut_copy_item(self, is_cut):
+        """
+        Copies or cuts selected textures to clipboard.
+
+        Args:
+            is_cut (bool): If True, removes original textures after copying.
+        """
         try:
             clipboard = QApplication.clipboard()
             mime_data = QtCore.QMimeData()
@@ -52,19 +64,19 @@ class EditMixin:
                 image_paths.append(item.data(QtCore.Qt.UserRole))
 
             if image_paths:
-                # Initialize an empty list to hold all URLs
+                # initialize an empty list to hold all URLs
                 urls_to_copy = []
                 for image_path in image_paths:
-                    # Move the image to the clipboard folder
+                    # move the image to the clipboard folder
                     new_path = os.path.join(
                         self.clipboard_temp_dir, os.path.basename(image_path)
                     )
                     copyfile(image_path, new_path)
 
-                    # Add the new path as a URL to the urls_to_copy list
+                    # add the new path as a URL to the urls_to_copy list
                     urls_to_copy.append(QtCore.QUrl.fromLocalFile(new_path))
 
-                # Set all collected URLs to the clipboard at once
+                # set all collected URLs to the clipboard at once
                 mime_data.setUrls(urls_to_copy)
                 clipboard.setMimeData(mime_data)
 
@@ -79,6 +91,10 @@ class EditMixin:
             print(f"[cut_copy_item] {e}")
 
     def paste_item(self):
+        """
+        Pastes textures from clipboard, handling both direct image data and file URLs.
+        Supports PNG, JPG, JPEG, GIF, and BMP formats.
+        """
         try:
             clipboard = QApplication.clipboard()
             mime_data = clipboard.mimeData()
@@ -113,6 +129,7 @@ class EditMixin:
             print(f"[paste_item] Error: {e}")
 
     def delete_textures(self):
+        """Removes selected textures from list and deletes corresponding files."""
         try:
             print("we deleting stuff")
             textures = self.lw_textures.selectedItems()
@@ -125,6 +142,12 @@ class EditMixin:
             print(f"[delete_textures] {e}")
 
     def de_select_all(self, toggle):
+        """
+        Selects or deselects all textures in list.
+
+        Args:
+            toggle (bool): If True, selects all. If False, deselects all.
+        """
         try:
             for i in range(self.lw_textures.count()):
                 self.lw_textures.item(i).setSelected(toggle)
@@ -132,6 +155,12 @@ class EditMixin:
             print(f"[de_select_all] {e}")
 
     def sort_textures(self, descending=False):
+        """
+        Sorts textures alphabetically.
+
+        Args:
+            descending (bool): If True, sorts in descending order.
+        """
         try:
             sort_order = QtCore.Qt.AscendingOrder
 
@@ -145,6 +174,12 @@ class EditMixin:
             print(f"[sort_textures] {e}")
 
     def rotate_texture(self, to_right):
+        """
+        Rotates selected textures 90 degrees.
+
+        Args:
+            to_right (bool): If True, rotates clockwise. If False, counterclockwise.
+        """
         try:
             selected_items = self.lw_textures.selectedItems()
 
@@ -173,7 +208,7 @@ class EditMixin:
             print(f"[rotate_texture] {e}")
 
     def defullbright_textures(self):
-
+        """Creates non-fullbright versions of selected textures."""
         try:
             textures = []
 
@@ -201,6 +236,7 @@ class EditMixin:
             print(f"[defullbright_textures] {e}")
 
     def rename_texture(self):
+        """Opens dialog to rename single selected texture. Prevents duplicate names."""
         try:
             selected_items = self.lw_textures.selectedItems()
 
@@ -242,6 +278,7 @@ class EditMixin:
             print(f"[rename_texture] {e}")
 
     def resize_texture(self):
+        """Opens dialog to resize selected textures."""
         try:
             selected_items = self.lw_textures.selectedItems()
             textures = []
@@ -266,6 +303,12 @@ class EditMixin:
             print(f"[resize_texture] {e}")
 
     def flip_texture(self, mirror=False):
+        """
+        Flips selected textures.
+
+        Args:
+            mirror (bool): If True, flips horizontally. If False, flips vertically.
+        """
         try:
             selected_items = self.lw_textures.selectedItems()
 

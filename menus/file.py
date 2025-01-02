@@ -1,11 +1,6 @@
-# pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
-# pylint: disable=redefined-outer-name
 # pylint: disable=multiple-imports
-# pylint: disable=missing-class-docstring
 # pylint: disable=broad-exception-caught
-# pylint: disable=too-few-public-methods
-# pylint: disable=unnecessary-lambda
 
 import os, tempfile
 from shutil import rmtree, copyfile
@@ -25,7 +20,12 @@ from utils.wad import (
 
 
 class FileMixin:
+    """
+    Mixin class providing file operations for WAD management.
+    """
+
     def new_wad(self):
+        """Creates new empty WAD workspace by clearing temp directory and texture list."""
         try:
             if self.temp_dir:
                 rmtree(self.temp_dir)
@@ -40,6 +40,12 @@ class FileMixin:
             print(f"[new_wad] {e}")
 
     def open_recent(self, new_path=None):
+        """
+        Updates and displays recent files menu.
+
+        Args:
+            new_path (str, optional): Path to add to recent files list.
+        """
         try:
             recent_files = os.path.join(self.user_data_dir, "recent_files")
 
@@ -87,6 +93,12 @@ class FileMixin:
             print(f"[open_recent] {e}")
 
     def open_wad(self, wad_path=None):
+        """
+        Opens WAD file and loads its textures.
+
+        Args:
+            wad_path (str, optional): Path to WAD file. If None, opens file dialog.
+        """
         try:
             if not wad_path:
                 self.wad_path, _ = QFileDialog.getOpenFileName(
@@ -114,6 +126,12 @@ class FileMixin:
             print(f"[open_wad] {e}")
 
     def import_wad(self, wad_paths):
+        """
+        Imports textures from multiple WAD files.
+
+        Args:
+            wad_paths (list): List of paths to WAD files.
+        """
         try:
             if len(wad_paths) < 1:
                 return
@@ -126,9 +144,14 @@ class FileMixin:
             print(f"[import_wad] {e}")
 
     def import_image(self, images):
+        """
+        Imports image files as textures.
+
+        Args:
+            images (list): List of paths to image files.
+        """
         try:
             textures = import_texture(images, self.temp_dir)
-            # __import__('pprint').pprint(imported_textures)
 
             if len(textures) < 1:
                 return
@@ -152,6 +175,12 @@ class FileMixin:
             print(f"[import_image] {e}")
 
     def import_wads_images(self, dropped_files=None):
+        """
+        Handles importing both WAD and image files.
+
+        Args:
+            dropped_files (list, optional): List of file paths from drag and drop.
+        """
         try:
             if dropped_files:
                 import_paths = dropped_files
@@ -186,6 +215,14 @@ class FileMixin:
             print(f"[import_wads_images] {e}")
 
     def save_wad(self, save_as=False, selected_only=False, export_images=False):
+        """
+        Saves textures to WAD file or exports as images.
+
+        Args:
+            save_as (bool): Force save as dialog if True.
+            selected_only (bool): Save only selected textures if True.
+            export_images (bool): Export as image files instead of WAD if True.
+        """
         try:
             export_path = None
 
@@ -223,6 +260,12 @@ class FileMixin:
             print(f"[save_wad] {e}")
 
     def unpack_wad(self, path):
+        """
+        Extracts textures from WAD file and adds them to texture list.
+
+        Args:
+            path (str): Path to WAD file to unpack.
+        """
         try:
             unwadded = unwad(path, self.temp_dir)
             temp_dir = unwadded[0]

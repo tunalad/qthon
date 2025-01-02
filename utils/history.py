@@ -1,6 +1,4 @@
-# pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
-# pylint: disable=missing-class-docstring
 # pylint: disable=broad-exception-caught
 # pylint: disable=multiple-imports
 import os, shutil
@@ -9,7 +7,17 @@ from pprint import pprint
 
 
 class History:
+    """
+    Manages undo/redo functionality with file-based state snapshots.
+    """
+
     def __init__(self, history_limit=0):
+        """
+        Initializes history management system.
+
+        Args:
+            history_limit (int): Maximum number of states to keep in history. 0 for unlimited.
+        """
         super().__init__()
         self.temp_dir = None
         self.history_limit = history_limit + 1
@@ -29,6 +37,12 @@ class History:
             self.position_callback()
 
     def set_temp_dir(self, temp_dir):
+        """
+        Sets temporary directory for storing state snapshots.
+
+        Args:
+            temp_dir (str): Path to temporary directory.
+        """
         self.temp_dir = temp_dir
         self.SNAPSHOTS = os.path.join(temp_dir, "snapshots")
 
@@ -36,16 +50,17 @@ class History:
             os.makedirs(self.SNAPSHOTS)
 
     def reset_state(self):
-        """
-        resets state to the default, empty, state
-        """
+        """Resets history to initial empty state."""
         # no exceptions for this cuz there's no way this errors out somehow xddd
         self.state = [{"time": time(), "list-state": []}]
         self.position = 1
 
     def new_change(self, new_state):
         """
-        when we make a change, we call this function and pass an array of the new state
+        Records new state in history and creates snapshot.
+
+        Args:
+            new_state (list): New state to record in history.
         """
         try:
             current_time = time()
@@ -76,7 +91,10 @@ class History:
 
     def undo(self, times=1):
         """
-        we use this to go back in history
+        Moves backward in history.
+
+        Args:
+            times (int): Number of states to move backward.
         """
         try:
             # no history
@@ -94,7 +112,10 @@ class History:
 
     def redo(self, times=1):
         """
-        we use this to go back in the future
+        Moves forward in history.
+
+        Args:
+            times (int): Number of states to move forward.
         """
         try:
             if not len(self.state) > 1:
@@ -116,12 +137,16 @@ class History:
             print(f"[History.redo] {e}")
 
     def print_state(self):
+        """Debug function to print current state."""
         return
         pprint(self.state[self.position - 1])
 
     def take_snapshot(self, snap_name):
         """
-        takes a snapshot of the current state and saves it in the snapshots folder
+        Creates filesystem snapshot of current state.
+
+        Args:
+            snap_name (str): Name for the snapshot directory.
         """
         try:
             if not self.temp_dir:
@@ -135,19 +160,21 @@ class History:
             for idx, item in enumerate(snap_state):
                 file_path = item.get("path")
                 if file_path:
-                    # Extract filename from path
+                    # extract filename from path
                     filename = os.path.basename(file_path)
-                    # Destination path for the copied file in the snapshot directory
+                    # destination path for the copied file in the snapshot directory
                     dest_path = os.path.join(snap_dir, filename)
-                    # Copy the file to the snapshot directory
+                    # copy the file to the snapshot directory
                     shutil.copy(file_path, dest_path)
-            # print(f"Snapshot '{snap_name}' made")
         except Exception as e:
             print(f"[History/take_snapshot] {e}")
 
     def load_snapshot(self, snap_name):
         """
-        loads a snapshot by copying its contents back to the current state
+        Restores state from filesystem snapshot.
+
+        Args:
+            snap_name (str): Name of snapshot to restore.
         """
         try:
             if not self.temp_dir:
@@ -155,7 +182,6 @@ class History:
 
             snap_dir = os.path.join(self.SNAPSHOTS, snap_name)
             if not os.path.exists(snap_dir):
-                # print(f"Snapshot '{snap_name}' does not exist")
                 return
 
             # remove shyt (except the snaps dir)
@@ -170,7 +196,5 @@ class History:
                 src_path = os.path.join(snap_dir, filename)
                 dest_path = os.path.join(self.temp_dir, filename)
                 shutil.copy(src_path, dest_path)
-
-            # print(f"Snapshot '{snap_name}' loaded")
         except Exception as e:
             print(f"[History/load_snapshot] {e}")

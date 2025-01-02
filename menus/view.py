@@ -1,11 +1,5 @@
-# pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
-# pylint: disable=redefined-outer-name
 # pylint: disable=multiple-imports
-# pylint: disable=missing-class-docstring
-# pylint: disable=broad-exception-caught
-# pylint: disable=too-few-public-methods
-# pylint: disable=unnecessary-lambda
 
 import os
 from PyQt5 import QtCore
@@ -19,7 +13,19 @@ from windows.PreferencesWindow import PreferencesWindow
 
 
 class ViewMixin:
+    """
+    Mixin class providing visual/view-related functionality for the application.
+    """
+
     def bars_manager(self, widget, action, movable_action=None):
+        """
+        Manages visibility and movability of toolbar widgets.
+
+        Args:
+            widget: Widget to manage (toolbar, statusbar, etc.).
+            action: Action that toggles widget visibility.
+            movable_action (optional): Action that toggles widget movability.
+        """
         try:
             if action:
                 widget.setVisible(not action.isChecked())
@@ -39,6 +45,12 @@ class ViewMixin:
             print(f"[bars_manager] {e}")
 
     def preview_texture(self, animation=False):
+        """
+        Opens preview window for selected texture.
+
+        Args:
+            animation (bool): If True, enables animation preview for liquid textures.
+        """
         try:
             selected_items = self.lw_textures.selectedItems()
 
@@ -61,6 +73,9 @@ class ViewMixin:
             print(f"[preview_texture] {e}")
 
     def preferences_handling(self):
+        """
+        Opens preferences window and applies changes to UI configuration.
+        """
         try:
             PreferencesWindow(settings=self.settings).exec_()
             self.load_config()

@@ -6,6 +6,7 @@
 # pylint: disable=broad-exception-caught
 # pylint: disable=too-few-public-methods
 # pylint: disable=unnecessary-lambda
+# pylint: disable=invalid-name
 
 import sys
 import os

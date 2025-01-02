@@ -1,3 +1,6 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=multiple-imports
+# pylint: disable=too-many-locals
 import os, sys
 
 from io import BytesIO
@@ -27,7 +30,7 @@ def unwad(wad_path, temp_dir):
 
     texture_names = []
 
-    # Flatten out palette
+    # flatten out palette
     palette = []
     for p in quake.palette:
         palette += p
@@ -38,7 +41,7 @@ def unwad(wad_path, temp_dir):
             fullpath = os.path.join(temp_dir, filename)
             fullpath_ext = "{0}.png".format(fullpath)
 
-            # Check if duplicate
+            # check if duplicate
             count = 1
             while os.path.exists(fullpath_ext):
                 # append suffix
@@ -47,22 +50,20 @@ def unwad(wad_path, temp_dir):
                 fullpath_ext = "{0}.png".format(fullpath_ext)  # Update fullpath_ext
                 count += 1
 
-            # print(fullpath_ext)
-
-            # Add texture name to the list
+            # add texture name to the list
             texture_names.append(os.path.splitext(os.path.basename(fullpath_ext))[0])
 
             data = None
             size = None
 
-            # Pictures
+            # pictures
             if item.type == wad.LumpType.QPIC:
                 with wad_file.open(filename) as lmp_file:
                     lump = lmp.Lmp.open(lmp_file)
                     size = lump.width, lump.height
                     data = array("B", lump.pixels)
 
-            # Special cases
+            # special cases
             elif item.type == wad.LumpType.MIPTEX:
                 try:
                     with wad_file.open(filename) as mip_file:
@@ -75,7 +76,7 @@ def unwad(wad_path, temp_dir):
                     continue
 
             try:
-                # Convert to image file
+                # convert to image file
                 if data is not None and size is not None:
                     img = Image.frombuffer("P", size, data, "raw", "P", 0, 1)
                     img.putpalette(palette)
@@ -89,6 +90,19 @@ def unwad(wad_path, temp_dir):
 
 
 def wadup(in_paths, out_path):
+    """
+    Creates a WAD file from PNG texture images.
+
+    Args:
+        in_paths (list): List of paths to PNG texture files.
+        out_path (str): Output path for the WAD file.
+
+    Notes:
+        - Converts images to Quake palette
+        - Generates mipmaps for each texture
+        - Creates MIPTEX lumps in WAD format
+    """
+
     # ensure output directory structure
     out_dir = os.path.dirname(out_path) or "."
     os.makedirs(out_dir, exist_ok=True)
@@ -148,6 +162,13 @@ def wadup(in_paths, out_path):
 
 
 def flip_texture(texture_path, mirror=False):
+    """
+    Flips a texture image either horizontally or vertically.
+
+    Args:
+        texture_path (str): Path to the texture image file.
+        mirror (bool, optional): If True, flips horizontally. If False, flips vertically. Defaults to False.
+    """
     img = Image.open(texture_path)
 
     if mirror:
@@ -162,6 +183,13 @@ def flip_texture(texture_path, mirror=False):
 
 
 def rotate_texture(texture_path, to_right=False):
+    """
+    Rotates a texture image 90 degrees clockwise or counterclockwise.
+
+    Args:
+        texture_path (str): Path to the texture image file.
+        to_right (bool, optional): If True, rotates 90° clockwise. If False, rotates 90° counterclockwise. Defaults to False.
+    """
     img = Image.open(texture_path)
 
     if to_right:
@@ -176,6 +204,23 @@ def rotate_texture(texture_path, to_right=False):
 
 
 def import_texture(images, temp_dir):
+    """
+    Processes and imports texture images with Quake palette constraints.
+
+    Args:
+        images (list): List of paths to image files.
+        temp_dir (str): Directory to store processed textures.
+
+    Returns:
+        list: Paths to the processed texture files.
+
+    Notes:
+        - Resizes images to multiples of 16
+        - Maximum dimension of 512 pixels while preserving aspect ratio
+        - Handles transparency by converting to RGB with palette background
+        - Quantizes colors to Quake palette
+        - Adds '{' prefix for textures with alpha channel
+    """
     has_alpha = False
 
     # quake palette
@@ -245,13 +290,27 @@ def import_texture(images, temp_dir):
 
 
 def defullbright(images):
+    """
+    Removes fullbright colors from texture images.
+
+    Args:
+        images (list): List of paths to texture image files.
+
+    Returns:
+        list: Paths to processed images with '-dfb' suffix.
+
+    Notes:
+        - Uses reduced Quake palette (colors 0-223 plus last color)
+        - Quantizes images to remove fullbright colors (224-254)
+    """
+
     # quake palette
     full_palette = []
     for p in quake.palette:
         full_palette += p
 
     # removed fullbrights
-    reduced_palette = full_palette[: 224 * 3] + full_palette[-3:] 
+    reduced_palette = full_palette[: 224 * 3] + full_palette[-3:]
 
     palette_image = Image.frombytes("P", (225, 1), bytes(reduced_palette))
     palette_image.putpalette(
@@ -282,16 +341,22 @@ def defullbright(images):
 
 
 def get_texture_size(image_path):
+    """
+    Returns the dimensions of a texture image.
+
+    Args:
+        image_path (str): Path to the texture image file.
+
+    Returns:
+        tuple: Width and height of the image in pixels.
+    """
     with Image.open(image_path) as img:
         return img.size
 
 
-def main():
+if __name__ == "__main__":
     # unwaded = unwad("catacomb.wad")
     # pprint(unwaded)
     # wadup("./gass", "gass.wad")
-    defullbright(["tv-fullbright.png"])
-
-
-if __name__ == "__main__":
-    main()
+    # defullbright(["tv-fullbright.png"])
+    pass
