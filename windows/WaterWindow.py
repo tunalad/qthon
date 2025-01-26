@@ -11,6 +11,7 @@
 import sys
 import os
 import threading
+from utils import path
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout
 from PyQt5.QtWebEngineWidgets import QWebEngineView
@@ -51,7 +52,7 @@ class LiquidPreview(QDialog):
         server_thread.daemon = True
         server_thread.start()
 
-        with open("index.html", "r") as file:
+        with open(path("index.html"), "r") as file:
             html_content = file.read()
 
         new_image_path = os.path.basename(self.texture)
