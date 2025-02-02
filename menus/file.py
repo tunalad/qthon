@@ -31,11 +31,11 @@ class FileMixin:
                 rmtree(self.temp_dir)
                 self.lw_textures.clear()
 
+            self.wad_path = None
+
             self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
             self.history.set_temp_dir(self.temp_dir)
             self.history.new_change(self.get_list_state())  # empty snap
-
-            self.wad_path = None
         except Exception as e:
             print(f"[new_wad] {e}")
 

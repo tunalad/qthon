@@ -4,12 +4,6 @@ INSTALL_DIR = $(HOME)/.local/bin
 VENV_DIR = make_venv
 PYTHON = python3
 
-# List all icons manually or use find to gather them
-ASSETS_ICONS = $(shell find assets/fugue-icons -type f)
-ASSETS_UI = $(shell find assets/ui -type f)
-ASSETS_UTILS = $(shell find assets/utils -type f)
-ASSETS_WINDOWS = $(shell find assets/windows -type f)
-
 all: build
 
 build: venv
