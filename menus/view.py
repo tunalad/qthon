@@ -1,11 +1,13 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=multiple-imports
 
-import os
+from logging import error
+
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (
     QMessageBox,
 )
+
 
 from windows.PreviewWindow import PreviewWindow
 from windows.WaterWindow import LiquidPreview
@@ -42,7 +44,7 @@ class ViewMixin:
                     lambda: widget.setMovable(movable_action.isChecked())
                 )
         except Exception as e:
-            print(f"[bars_manager] {e}")
+            error(f"[bars_manager] {e}")
 
     def preview_texture(self, animation=False):
         """
@@ -70,7 +72,7 @@ class ViewMixin:
             else:
                 PreviewWindow(item["path"], 200, animation).exec_()
         except Exception as e:
-            print(f"[preview_texture] {e}")
+            error(f"[preview_texture] {e}")
 
     def preferences_handling(self):
         """
@@ -87,4 +89,4 @@ class ViewMixin:
                 self.tb_editor, self.actionHide_sidebar, self.actionMovable_sidebar
             )
         except Exception as e:
-            print(f"[preferences_handling] {e}")
+            error(f"[preferences_handling] {e}")

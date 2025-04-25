@@ -39,6 +39,9 @@ class PreferencesWindow(QDialog):
         cfg["move_item"]["toolbar"] = self.cb_move_toolbar.isChecked()
         cfg["move_item"]["sidebar"] = self.cb_move_sidebar.isChecked()
 
+        cfg["defullbright"]["show_prompt"] = self.cb_ask.isChecked()
+        cfg["defullbright"]["overwrite"] = self.rb_replace.isChecked()
+
         with open(self.settings.config_path, "w") as f:
             toml.dump(self.cfg, f)
 
@@ -53,6 +56,10 @@ class PreferencesWindow(QDialog):
 
         self.cb_move_toolbar.setChecked(cfg["move_item"]["toolbar"])
         self.cb_move_sidebar.setChecked(cfg["move_item"]["sidebar"])
+
+        self.cb_ask.setChecked(cfg["defullbright"]["show_prompt"])
+        self.rb_replace.setChecked(cfg["defullbright"]["overwrite"])
+        self.rb_duplicate.setChecked(not cfg["defullbright"]["overwrite"])
 
     def ok_clicked(self):
         self.apply_settings(self.cfg)

@@ -3,6 +3,7 @@
 # pylint: disable=broad-exception-caught
 # pylint: disable=unnecessary-lambda
 import os
+from logging import error
 from shutil import rmtree, copyfile
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import (
@@ -17,8 +18,11 @@ from utils.wad import (
     defullbright,
 )
 
+from utils import settings
+
 from windows.RenameWindow import RenameWindow
 from windows.ResizeWindow import ResizeWindow
+from windows.DfbWindow import DfbWindow
 
 
 class EditMixin:
@@ -41,7 +45,7 @@ class EditMixin:
 
             self.set_list_state()
         except Exception as e:
-            print(f"[undo_redo] {e}")
+            error(f"[undo_redo] {e}")
 
     def cut_copy_item(self, is_cut):
         """
@@ -88,7 +92,7 @@ class EditMixin:
                     self.history.new_change(self.get_list_state())
 
         except Exception as e:
-            print(f"[cut_copy_item] {e}")
+            error(f"[cut_copy_item] {e}")
 
     def paste_item(self):
         """
@@ -126,7 +130,7 @@ class EditMixin:
                 self.import_image(image_paths)
 
         except Exception as e:
-            print(f"[paste_item] Error: {e}")
+            error(f"[paste_item] Error: {e}")
 
     def delete_textures(self):
         """Removes selected textures from list and deletes corresponding files."""
@@ -139,7 +143,7 @@ class EditMixin:
 
             self.history.new_change(self.get_list_state())
         except Exception as e:
-            print(f"[delete_textures] {e}")
+            error(f"[delete_textures] {e}")
 
     def de_select_all(self, toggle):
         """
@@ -152,7 +156,7 @@ class EditMixin:
             for i in range(self.lw_textures.count()):
                 self.lw_textures.item(i).setSelected(toggle)
         except Exception as e:
-            print(f"[de_select_all] {e}")
+            error(f"[de_select_all] {e}")
 
     def sort_textures(self, descending=False):
         """
@@ -171,7 +175,7 @@ class EditMixin:
 
             self.history.new_change(self.get_list_state())
         except Exception as e:
-            print(f"[sort_textures] {e}")
+            error(f"[sort_textures] {e}")
 
     def rotate_texture(self, to_right):
         """
@@ -205,7 +209,7 @@ class EditMixin:
 
             self.history.new_change(self.get_list_state())
         except Exception as e:
-            print(f"[rotate_texture] {e}")
+            error(f"[rotate_texture] {e}")
 
     def defullbright_textures(self):
         """Creates non-fullbright versions of selected textures."""
@@ -215,7 +219,16 @@ class EditMixin:
             for i in self.lw_textures.selectedItems():
                 textures.append(i.data(QtCore.Qt.UserRole))
 
-            dfb_textures = defullbright(textures)
+            dfb_settings = settings.Config().parsed_cfg["defullbright"]
+
+            if dfb_settings["show_prompt"]:
+                dfb_propt = DfbWindow()
+                if not dfb_propt.exec_():
+                    return
+
+            dfb_settings = settings.Config().parsed_cfg["defullbright"]
+
+            dfb_textures = defullbright(textures, dfb_settings["overwrite"])
 
             for t in dfb_textures:
                 filename = os.path.splitext(os.path.basename(t))[0]
@@ -233,7 +246,7 @@ class EditMixin:
 
             self.history.new_change(self.get_list_state())
         except Exception as e:
-            print(f"[defullbright_textures] {e}")
+            error(f"[defullbright_textures] {e}")
 
     def rename_texture(self):
         """Opens dialog to rename single selected texture. Prevents duplicate names."""
@@ -275,7 +288,7 @@ class EditMixin:
                 )
                 self.history.new_change(self.get_list_state())
         except Exception as e:
-            print(f"[rename_texture] {e}")
+            error(f"[rename_texture] {e}")
 
     def resize_texture(self):
         """Opens dialog to resize selected textures."""
@@ -300,7 +313,7 @@ class EditMixin:
                 self.history.new_change(self.get_list_state())
                 self.set_list_state()
         except Exception as e:
-            print(f"[resize_texture] {e}")
+            error(f"[resize_texture] {e}")
 
     def flip_texture(self, mirror=False):
         """
@@ -334,4 +347,4 @@ class EditMixin:
 
             self.history.new_change(self.get_list_state())
         except Exception as e:
-            print(f"[flip_texture] {e}")
+            error(f"[flip_texture] {e}")

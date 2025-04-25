@@ -10,6 +10,7 @@
 
 import sys, os, tempfile
 import assets.ui.resource_ui
+from logging import error
 from shutil import rmtree
 from appdirs import user_data_dir
 from PyQt5 import uic, QtGui, QtCore
@@ -247,13 +248,13 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
             else:
                 event.ignore()
         except Exception as e:
-            print(f"[dragEnterEvent] {e}")
+            error(f"[dragEnterEvent] {e}")
 
     def dragLeaveEvent(self):
         try:
             self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
         except Exception as e:
-            print(f"[dragLeaveEvent] {e}")
+            error(f"[dragLeaveEvent] {e}")
 
     def dropEvent(self, event):
         try:
@@ -261,14 +262,14 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
             self.import_wads_images(dropped_files=files)
             self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
         except Exception as e:
-            print(f"[dropEvent] {e}")
+            error(f"[dropEvent] {e}")
 
     def closeEvent(self, event):
         try:
             rmtree(self.temp_dir)
             rmtree(self.clipboard_temp_dir)
         except Exception as e:
-            print(f"[closeEvent] {e}")
+            error(f"[closeEvent] {e}")
         finally:
             event.accept()
 
@@ -299,7 +300,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
             self.actionMovable_toolbar.setChecked(cfg["move_item"]["toolbar"])
             self.actionMovable_sidebar.setChecked(cfg["move_item"]["sidebar"])
         except Exception as e:
-            print(f"[load_config] {e}")
+            error(f"[load_config] {e}")
 
     def update_cfg_item(self, keys, value):
         try:
@@ -309,7 +310,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
             config[keys[-1]] = value
             self.settings.update_config(self.settings.parsed_cfg)
         except Exception as e:
-            print(f"[update_cfg_item] {e}")
+            error(f"[update_cfg_item] {e}")
 
     def set_search(self):
         try:
@@ -328,7 +329,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
 
             self.search_bar.textChanged.connect(self.fzf_textures)
         except Exception as e:
-            print(f"[set_search] {e}")
+            error(f"[set_search] {e}")
 
     def fzf_textures(self):
         try:
@@ -338,7 +339,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
                 item_text = item.text().lower()
                 item.setHidden(search_text not in item_text)
         except Exception as e:
-            print(f"[fzf_textures] {e}")
+            error(f"[fzf_textures] {e}")
 
     def title_management(self):
         try:
@@ -349,7 +350,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
             else:
                 self.setWindowTitle(f"{os.path.basename(self.wad_path)} - Qthon")
         except Exception as e:
-            print(f"[title_management] {e}")
+            error(f"[title_management] {e}")
 
     def adjust_zoom(self, zoom_type):
         try:
@@ -364,7 +365,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
                 QtCore.QSize(self.texture_size, self.texture_size)
             )
         except Exception as e:
-            print(f"[adjust_zoom] {e}")
+            error(f"[adjust_zoom] {e}")
 
     def disable_actions(self, actions, not_implemented=False):
         try:
@@ -377,7 +378,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
                 a.setToolTip(tooltip)
                 a.setEnabled(False)
         except Exception as e:
-            print(f"[disable_actions] {e}")
+            error(f"[disable_actions] {e}")
 
     def disable_previews(self):
         try:
@@ -398,7 +399,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
             else:
                 self.actionView_Animated.setEnabled(True)
         except Exception as e:
-            print(f"[disable_previews] {e}")
+            error(f"[disable_previews] {e}")
 
     def statusbar_text(self):
         try:
@@ -418,7 +419,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
                     f"{texture.text()} | {get_texture_size(texture.data(QtCore.Qt.UserRole))}"
                 )
         except Exception as e:
-            print(f"[statusbar_text] {e}")
+            error(f"[statusbar_text] {e}")
 
     def get_list_state(self):
         try:
@@ -435,7 +436,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
 
             return state
         except Exception as e:
-            print(f"[get_list_state] {e}")
+            error(f"[get_list_state] {e}")
             return e
 
     def set_list_state(self):
@@ -460,7 +461,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
 
                 self.lw_textures.addItem(item)
         except Exception as e:
-            print(f"[set_list_state] {e}")
+            error(f"[set_list_state] {e}")
 
     def active_on_selection(self, actions, multi=False):
         try:
@@ -472,7 +473,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
                 else:
                     a.setEnabled(False)
         except Exception as e:
-            print(f"[active_on_selection] {e}")
+            error(f"[active_on_selection] {e}")
 
 
 if __name__ == "__main__":

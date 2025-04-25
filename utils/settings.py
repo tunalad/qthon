@@ -76,6 +76,10 @@ class Config:
                 "toolbar": False,
             },
             "move_item": {"sidebar": False, "toolbar": False},
+            "defullbright": {
+                "show_prompt": True,
+                "overwrite": False,
+            },
         }
 
         os.makedirs(os.path.dirname(path), exist_ok=True)

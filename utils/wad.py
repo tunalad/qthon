@@ -25,6 +25,8 @@ def unwad(wad_path, temp_dir):
         tuple: A tuple containing the path to the temporary directory where contents are extracted
                and a list of texture names extracted from the WAD file.
     """
+    print(wad.WadInfo(wad_path).compression)
+
     if not wad.is_wadfile(wad_path):
         raise ValueError(f"Invalid WAD file: {wad_path}")
 
@@ -289,12 +291,13 @@ def import_texture(images, temp_dir):
     return new_paths
 
 
-def defullbright(images):
+def defullbright(images, overwrite=False):
     """
     Removes fullbright colors from texture images.
 
     Args:
         images (list): List of paths to texture image files.
+        overwrite (bool): If True, files will be overwriten and '-dfb' suffix won't be added.
 
     Returns:
         list: Paths to processed images with '-dfb' suffix.
@@ -323,11 +326,19 @@ def defullbright(images):
         img = img.quantize(palette=palette_image)
 
         base_name, ext = os.path.splitext(os.path.basename(img_path))
-        new_path = os.path.join(os.path.dirname(img_path), f"{base_name}-dfb.png")
+
+        # overwrite
+        if overwrite:
+            new_path = os.path.join(os.path.dirname(img_path), f"{base_name}{ext}")
+        else:
+            new_path = os.path.join(os.path.dirname(img_path), f"{base_name}-dfb{ext}")
 
         # dealing with duplicate names
         index = 1
         while os.path.exists(new_path):
+            if overwrite:
+                break
+
             new_path = os.path.join(
                 os.path.dirname(img_path), f"{base_name}-dfb ({index}).png"
             )
@@ -335,7 +346,9 @@ def defullbright(images):
 
         img.save(new_path, format="PNG")
         img.close()
-        new_paths.append(new_path)
+
+        if not overwrite:
+            new_paths.append(new_path)
 
     return new_paths
 
