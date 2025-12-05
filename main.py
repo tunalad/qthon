@@ -26,9 +26,7 @@ from PyQt5.QtWidgets import (
 )
 
 from utils import history, settings, path
-from utils.wad import (
-    get_texture_size,
-)
+from utils.wad import get_texture_size
 from menus.file import FileMixin
 from menus.edit import EditMixin
 from menus.view import ViewMixin

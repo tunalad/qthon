@@ -6,7 +6,10 @@ PYTHON = python3
 
 all: build
 
-build: venv
+resources:
+	pyrcc5 assets/assets.qrc -o assets/ui/resource_ui.py
+
+build: venv resources
 	$(VENV_DIR)/bin/pyinstaller qthon.spec
 
 venv:

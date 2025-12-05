@@ -33,4 +33,9 @@
   <qresource prefix="logo">
     <file>qthon.png</file>
   </qresource>
+  <qresource prefix="games">
+    <file alias="doom-48x48.png">doom-48x48.png</file>
+    <file alias="quake-48x48.png">quake-48x48.png</file>
+    <file alias="hl1-32x32.png">hl1-32x32.png</file>
+  </qresource>
 </RCC>

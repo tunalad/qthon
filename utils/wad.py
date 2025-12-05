@@ -367,6 +367,30 @@ def get_texture_size(image_path):
         return img.size
 
 
+def get_wad_type(file_path):
+    """
+    Determines the WAD type by reading its magic number.
+
+    Args:
+        file_path (str): The full path to the WAD file.
+
+    Returns:
+        str or None: The type of the WAD ('DOOM', 'QUAKE', 'HL') or None
+    """
+    try:
+        with open(file_path, "rb") as f:
+            magic = f.read(4)
+            if magic in [b"IWAD", b"PWAD"]:
+                return "DOOM"
+            elif magic == b"WAD2":
+                return "QUAKE"
+            elif magic == b"WAD3":
+                return "HL"
+    except (IOError, IndexError):
+        return None
+    return None
+
+
 if __name__ == "__main__":
     # unwaded = unwad("catacomb.wad")
     # pprint(unwaded)

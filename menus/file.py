@@ -17,6 +17,7 @@ from utils.wad import (
     wadup,
     import_texture,
 )
+from utils.icon_provider import WadIconProvider
 
 
 class FileMixin:
@@ -25,7 +26,9 @@ class FileMixin:
     """
 
     def new_wad(self):
-        """Creates new empty WAD workspace by clearing temp directory and texture list."""
+        """
+        Creates new empty WAD workspace by clearing temp directory and texture list.
+        """
         try:
             if self.temp_dir:
                 rmtree(self.temp_dir)
@@ -101,9 +104,14 @@ class FileMixin:
         """
         try:
             if not wad_path:
-                self.wad_path, _ = QFileDialog.getOpenFileName(
-                    self, "Select a WAD file", "", "WAD Files (*.wad);;All Files (*)"
-                )
+                dialog = QFileDialog(self, "Select a WAD file")
+                dialog.setIconProvider(WadIconProvider())
+                dialog.setFileMode(QFileDialog.ExistingFile)
+                dialog.setNameFilter("WAD Files (*.wad);;All Files (*)")
+                if dialog.exec_():
+                    self.wad_path = dialog.selectedFiles()[0]
+                else:
+                    return
             else:
                 self.wad_path = wad_path
 
@@ -185,12 +193,16 @@ class FileMixin:
             if dropped_files:
                 import_paths = dropped_files
             else:
-                import_paths, _ = QFileDialog.getOpenFileNames(
-                    self,
-                    "Import file(s)",
-                    "",
-                    "WAD Files (*.wad);;Images (*.png *.jpg *.jpeg);;All files (*)",
+                dialog = QFileDialog(self, "Import file(s)")
+                dialog.setIconProvider(WadIconProvider())
+                dialog.setFileMode(QFileDialog.ExistingFiles)
+                dialog.setNameFilter(
+                    "WAD Files (*.wad);;Images (*.png *.jpg *.jpeg);;All files (*)"
                 )
+                if dialog.exec_():
+                    import_paths = dialog.selectedFiles()
+                else:
+                    return
 
             wad_paths = []
             image_paths = []
@@ -227,13 +239,22 @@ class FileMixin:
             export_path = None
 
             if not self.wad_path or save_as:
-                self.wad_path, _ = QFileDialog.getSaveFileName(
-                    self, "Save WAD file", "", "WAD Files (*.wad);;All Files (*)"
-                )
+                dialog = QFileDialog(self, "Save WAD file")
+                dialog.setIconProvider(WadIconProvider())
+                dialog.setAcceptMode(QFileDialog.AcceptSave)
+                dialog.setNameFilter("WAD Files (*.wad);;All Files (*)")
+                if dialog.exec_():
+                    self.wad_path = dialog.selectedFiles()[0]
+                else:
+                    return
             elif export_images:
-                export_path = QFileDialog.getExistingDirectory(
-                    self, "Select export directory"
-                )
+                dialog = QFileDialog(self, "Select export directory")
+                dialog.setIconProvider(WadIconProvider())
+                dialog.setFileMode(QFileDialog.Directory)
+                if dialog.exec_():
+                    export_path = dialog.selectedFiles()[0]
+                else:
+                    return
 
             if self.wad_path:
                 # show items

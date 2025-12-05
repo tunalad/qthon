@@ -105,7 +105,7 @@
      <x>0</x>
      <y>0</y>
      <width>867</width>
-     <height>22</height>
+     <height>19</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -274,7 +274,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/document-medium.png</normaloff>:/icons/fugue-icons/document-medium.png</iconset>
    </property>
    <property name="text">
@@ -292,7 +292,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/folder-open.png</normaloff>:/icons/fugue-icons/folder-open.png</iconset>
    </property>
    <property name="text">
@@ -318,7 +318,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/disk.png</normaloff>:/icons/fugue-icons/disk.png</iconset>
    </property>
    <property name="text">
@@ -336,7 +336,7 @@
   </action>
   <action name="actionSave_As">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/disk--pencil.png</normaloff>:/icons/fugue-icons/disk--pencil.png</iconset>
    </property>
    <property name="text">
@@ -354,7 +354,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/minus-button.png</normaloff>:/icons/fugue-icons/minus-button.png</iconset>
    </property>
    <property name="text">
@@ -369,7 +369,7 @@
   </action>
   <action name="actionImport">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/document--arrow.png</normaloff>:/icons/fugue-icons/document--arrow.png</iconset>
    </property>
    <property name="text">
@@ -387,7 +387,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/information-button.png</normaloff>:/icons/fugue-icons/information-button.png</iconset>
    </property>
    <property name="text">
@@ -399,7 +399,7 @@
   </action>
   <action name="actionHelp">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/book-question.png</normaloff>:/icons/fugue-icons/book-question.png</iconset>
    </property>
    <property name="text">
@@ -414,7 +414,7 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/arrow-turn-180-left.png</normaloff>:/icons/fugue-icons/arrow-turn-180-left.png</iconset>
    </property>
    <property name="text">
@@ -454,7 +454,7 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/scissors-blue.png</normaloff>:/icons/fugue-icons/scissors-blue.png</iconset>
    </property>
    <property name="text">
@@ -472,7 +472,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/document-copy.png</normaloff>:/icons/fugue-icons/document-copy.png</iconset>
    </property>
    <property name="text">
@@ -490,7 +490,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/clipboard-paste-document-text.png</normaloff>:/icons/fugue-icons/clipboard-paste-document-text.png</iconset>
    </property>
    <property name="text">
@@ -508,7 +508,7 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/image--minus.png</normaloff>:/icons/fugue-icons/image--minus.png</iconset>
    </property>
    <property name="text">
@@ -526,7 +526,7 @@
   </action>
   <action name="actionRename">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/document-rename.png</normaloff>:/icons/fugue-icons/document-rename.png</iconset>
    </property>
    <property name="text">
@@ -544,7 +544,7 @@
   </action>
   <action name="actionResize">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/ui-panel-resize.png</normaloff>:/icons/fugue-icons/ui-panel-resize.png</iconset>
    </property>
    <property name="text">
@@ -559,7 +559,7 @@
   </action>
   <action name="actionMirror">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/layer-flip.png</normaloff>:/icons/fugue-icons/layer-flip.png</iconset>
    </property>
    <property name="text">
@@ -574,7 +574,7 @@
   </action>
   <action name="actionFlip">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/layer-flip-vertical.png</normaloff>:/icons/fugue-icons/layer-flip-vertical.png</iconset>
    </property>
    <property name="text">
@@ -589,7 +589,7 @@
   </action>
   <action name="actionView_Detailed">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/magnifier.png</normaloff>:/icons/fugue-icons/magnifier.png</iconset>
    </property>
    <property name="text">
@@ -601,7 +601,7 @@
   </action>
   <action name="actionView_Animated">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/film.png</normaloff>:/icons/fugue-icons/film.png</iconset>
    </property>
    <property name="text">
@@ -656,7 +656,7 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/arrow-turn.png</normaloff>:/icons/fugue-icons/arrow-turn.png</iconset>
    </property>
    <property name="text">
@@ -697,7 +697,7 @@
   </action>
   <action name="actionZoom_In">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/magnifier--plus.png</normaloff>:/icons/fugue-icons/magnifier--plus.png</iconset>
    </property>
    <property name="text">
@@ -712,7 +712,7 @@
   </action>
   <action name="actionZoom_Out">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/magnifier--minus.png</normaloff>:/icons/fugue-icons/magnifier--minus.png</iconset>
    </property>
    <property name="text">
@@ -757,7 +757,7 @@
   </action>
   <action name="actionDefullbright">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/light-bulb-off.png</normaloff>:/icons/fugue-icons/light-bulb-off.png</iconset>
    </property>
    <property name="text">
@@ -790,7 +790,7 @@
   </action>
   <action name="actionRotate_Left">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/arrow-circle-225-left.png</normaloff>:/icons/fugue-icons/arrow-circle-225-left.png</iconset>
    </property>
    <property name="text">
@@ -805,7 +805,7 @@
   </action>
   <action name="actionRotate_Right">
    <property name="icon">
-    <iconset resource="../fugue_icons.qrc">
+    <iconset resource="../assets.qrc">
      <normaloff>:/icons/fugue-icons/arrow-circle-315.png</normaloff>:/icons/fugue-icons/arrow-circle-315.png</iconset>
    </property>
    <property name="text">
@@ -830,7 +830,7 @@
   </action>
  </widget>
  <resources>
-  <include location="../fugue_icons.qrc"/>
+  <include location="../assets.qrc"/>
  </resources>
  <connections/>
 </ui>
