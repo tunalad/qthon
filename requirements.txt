@@ -3,6 +3,7 @@ Pillow==11.1.0
 PyQt5==5.15.10
 PyQt5_sip==12.16.1
 toml==0.10.2
-vgio==1.3.0
+#vgio==1.3.0
+git+https://github.com/joshuaskelly/vgio.git@features/half-life
 PyQtWebEngine==5.15.6
 PyQtWebEngine-Qt5==5.15.2

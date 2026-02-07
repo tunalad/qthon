@@ -10,7 +10,10 @@ from struct import unpack
 from PIL import Image
 
 from vgio import quake
-from vgio.quake import lmp, wad
+from vgio import halflife
+from vgio.quake import lmp
+from vgio.quake import wad as wad2
+from vgio.halflife import wad as wad3
 
 
 def unwad(wad_path, temp_dir):
@@ -25,6 +28,14 @@ def unwad(wad_path, temp_dir):
         tuple: A tuple containing the path to the temporary directory where contents are extracted
                and a list of texture names extracted from the WAD file.
     """
+
+    wad = wad2
+    is_wad3 = False
+
+    if get_wad_type(wad_path) == "HL":
+        wad = wad3
+        is_wad3 = True
+
     print(wad.WadInfo(wad_path).compression)
 
     if not wad.is_wadfile(wad_path):
@@ -73,10 +84,17 @@ def unwad(wad_path, temp_dir):
                         data = mip.pixels[: mip.width * mip.height]
                         data = array("B", data)
                         size = mip.width, mip.height
+
+                        # for WAD3, use embedded palette from miptexture
+                        if is_wad3 and mip.palette:
+                            palette = list(mip.palette)
+                        else:
+                            palette = []
+                            for p in quake.palette:
+                                palette += p
                 except Exception as e:
                     print(f"Failed to extract resource: {filename}", file=sys.stderr)
                     continue
-
             try:
                 # convert to image file
                 if data is not None and size is not None:
