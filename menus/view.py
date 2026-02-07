@@ -1,6 +1,7 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=multiple-imports
 
+from os import path
 from logging import error
 
 from PyQt5 import QtCore
@@ -67,7 +68,7 @@ class ViewMixin:
                 "title": selected_items[0].text(),
                 "path": selected_items[0].data(QtCore.Qt.UserRole),
             }
-            if os.path.basename(item["path"]).startswith("*") and animation:
+            if path.basename(item["path"]).startswith("*") and animation:
                 LiquidPreview(texture=item["path"], port=9742).exec()
             else:
                 PreviewWindow(item["path"], 200, animation).exec_()
