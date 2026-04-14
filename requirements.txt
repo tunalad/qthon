@@ -1,5 +1,5 @@
 appdirs==1.4.4
-Pillow==11.1.0
+Pillow==12.2.0
 PyQt5==5.15.10
 PyQt5_sip==12.16.1
 toml==0.10.2
