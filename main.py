@@ -33,6 +33,11 @@ from menus.view import ViewMixin
 
 from windows.AboutWindow import AboutWindow
 
+try:
+    from version_build import __version__
+except ImportError:
+    from version import __version__
+
 
 class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
     def __init__(self):
@@ -342,11 +347,15 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
     def title_management(self):
         try:
             if not self.wad_path:
-                self.setWindowTitle("Untitled* - Qthon")
+                self.setWindowTitle(f"Untitled* - Qthon {__version__}")
             elif self.wad_path and (self.save_pos != self.history.position):
-                self.setWindowTitle(f"{os.path.basename(self.wad_path)}* - Qthon")
+                self.setWindowTitle(
+                    f"{os.path.basename(self.wad_path)}* - Qthon  {__version__}"
+                )
             else:
-                self.setWindowTitle(f"{os.path.basename(self.wad_path)} - Qthon")
+                self.setWindowTitle(
+                    f"{os.path.basename(self.wad_path)} - Qthon  {__version__}"
+                )
         except Exception as e:
             error(f"[title_management] {e}")
 

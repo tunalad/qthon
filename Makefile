@@ -1,22 +1,8 @@
-PACKAGE_NAME = qthon
-BINARY_NAME = $(PACKAGE_NAME)
 INSTALL_DIR = $(HOME)/.local/bin
-VENV_DIR = make_venv
-PYTHON = python3
+BINARY_NAME = qthon
 
-all: build
-
-resources:
-	pyrcc5 assets/assets.qrc -o assets/ui/resource_ui.py
-
-build: venv resources
-	$(VENV_DIR)/bin/pyinstaller qthon.spec
-
-venv:
-	$(PYTHON) -m venv $(VENV_DIR)
-	$(VENV_DIR)/bin/python -m pip install --upgrade pip
-	$(VENV_DIR)/bin/python -m pip install pyinstaller
-	$(VENV_DIR)/bin/python -m pip install -r requirements.txt
+build:
+	python3 build.py
 
 install: build
 	install -m 755 dist/$(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)
@@ -25,7 +11,7 @@ uninstall:
 	rm -f $(INSTALL_DIR)/$(BINARY_NAME)
 
 clean:
-	rm -rf build dist $(VENV_DIR)
+	rm -rf build dist venv_build
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 
 lean:
@@ -39,4 +25,4 @@ lean:
 	@echo -e "\e[1;35m💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜\e[0m"
 	@exit 1
 
-.PHONY: all build install uninstall clean lean venv
+.PHONY: build install uninstall clean
