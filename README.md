@@ -6,6 +6,8 @@
 
 <p align="center"><em>A replacement for TexMex.</em></p>
 
+<p align="center"><img src="./screenshots/screenshot01.png"></img></p>
+
 ## Features
 
 - Open and edit WAD2 and WAD3 files
