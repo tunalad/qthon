@@ -31,6 +31,8 @@
     <file>fugue-icons/ui-panel-resize.png</file>
   </qresource>
   <qresource prefix="logo">
+    <file>qthon-smooth.svg</file>
+    <file>qthon.svg</file>
     <file>qthon.png</file>
   </qresource>
   <qresource prefix="games">
