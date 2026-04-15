@@ -10,11 +10,12 @@
 
 ## Features
 
-- Open and edit WAD2 and WAD3 files
+- Open and edit WAD files
 - Import PNG, JPG, JPEG images as textures
 - Texture operations: flip, rotate, resize, rename
 - Defullbright: remove fullbright colors from textures
-- Export as WAD2 or individual images (WAD3 not yet supported)
+- Export as WAD or individual images
+- Supports both WAD2 (Quake) and WAD3 (Half-Life)
 - Animated liquid texture preview
 
 ## Installation

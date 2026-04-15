@@ -47,6 +47,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
         self.setAcceptDrops(True)
 
         self.wad_path = None
+        self.wad_game = "QUAKE"
         self.texture_size = 128
         self.texture_spacing = 17
         self.undo_limit = 0  # 0 means no limit
@@ -411,19 +412,20 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
     def statusbar_text(self):
         try:
             selected_items = self.lw_textures.selectedItems()
+            game_text = f"Game: {self.wad_game}" if self.wad_path else "No WAD open"
 
             if len(selected_items) < 1:
-                self.statusbar.clearMessage()
+                self.statusbar.showMessage(game_text)
                 return
 
             if len(selected_items) > 1:
                 self.statusbar.showMessage(
-                    f"Selected items: {len(selected_items)}/{self.lw_textures.count()}"
+                    f"{game_text} | Selected: {len(selected_items)}/{self.lw_textures.count()}"
                 )
             else:
                 texture = selected_items[0]
                 self.statusbar.showMessage(
-                    f"{texture.text()} | {get_texture_size(texture.data(QtCore.Qt.UserRole))}"
+                    f"{game_text} | {texture.text()} | {get_texture_size(texture.data(QtCore.Qt.UserRole))}"
                 )
         except Exception as e:
             error(f"[statusbar_text] {e}")

@@ -15,7 +15,9 @@ from PyQt5.QtWidgets import (
 from utils.wad import (
     unwad,
     wadup,
+    wadup_hl,
     import_texture,
+    get_wad_type,
 )
 from utils.icon_provider import WadIconProvider
 
@@ -35,10 +37,12 @@ class FileMixin:
                 self.lw_textures.clear()
 
             self.wad_path = None
+            self.wad_game = "QUAKE"
 
             self.temp_dir = tempfile.mkdtemp(prefix="tmp-qtwaditor-")
             self.history.set_temp_dir(self.temp_dir)
             self.history.new_change(self.get_list_state())  # empty snap
+            self.statusbar_text()
         except Exception as e:
             print(f"[new_wad] {e}")
 
@@ -126,8 +130,11 @@ class FileMixin:
             self.history.reset_state()
 
             self.lw_textures.clear()
+            self.wad_game = get_wad_type(self.wad_path) or "QUAKE"
             self.import_wad([self.wad_path])
             self.save_pos = self.history.position
+
+            self.statusbar_text()
 
             self.open_recent(self.wad_path)
         except Exception as e:
@@ -242,9 +249,14 @@ class FileMixin:
                 dialog = QFileDialog(self, "Save WAD file")
                 dialog.setIconProvider(WadIconProvider())
                 dialog.setAcceptMode(QFileDialog.AcceptSave)
-                dialog.setNameFilter("WAD Files (*.wad);;All Files (*)")
+                dialog.setNameFilter(
+                    "Quake WAD (*.wad);;Half-Life WAD (*.wad);;All Files (*)"
+                )
                 if dialog.exec_():
                     self.wad_path = dialog.selectedFiles()[0]
+                    self.wad_game = (
+                        "HL" if "Half-Life" in dialog.selectedNameFilter() else "QUAKE"
+                    )
                 else:
                     return
             elif export_images:
@@ -273,9 +285,13 @@ class FileMixin:
                         destination_path = os.path.join(export_path, file_name)
                         copyfile(t, destination_path)
                 else:
-                    wadup(textures_list, self.wad_path)
+                    if self.wad_game == "HL":
+                        wadup_hl(textures_list, self.wad_path)
+                    else:
+                        wadup(textures_list, self.wad_path)
 
-                self.save_pos = self.history.position
+                    self.save_pos = self.history.position
+                    self.statusbar_text()
 
         except Exception as e:
             print(f"[save_wad] {e}")

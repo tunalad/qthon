@@ -111,7 +111,7 @@ def unwad(wad_path, temp_dir):
 
 def wadup(in_paths, out_path):
     """
-    Creates a WAD file from PNG texture images.
+    Creates a WAD2 file from PNG texture images.
 
     Args:
         in_paths (list): List of paths to PNG texture files.
@@ -122,6 +122,8 @@ def wadup(in_paths, out_path):
         - Generates mipmaps for each texture
         - Creates MIPTEX lumps in WAD format
     """
+
+    wad = wad2
 
     # ensure output directory structure
     out_dir = os.path.dirname(out_path) or "."
@@ -176,6 +178,77 @@ def wadup(in_paths, out_path):
                         print(f"Adding: {file_path}")
 
                         wad_file.writestr(info, buff)
+
+                except Exception as e:
+                    print(f"Error processing {file_path}: {e}")
+
+
+def wadup_hl(in_paths, out_path):
+    """
+    Creates a WAD3 file from PNG texture images.
+
+    Args:
+        in_paths (list): List of paths to PNG texture files.
+        out_path (str): Output path for the WAD file.
+
+    Notes:
+        - Converts images to Quake palette
+        - Generates mipmaps for each texture
+        - Creates MIPTEX lumps in WAD format
+    """
+    out_dir = os.path.dirname(out_path) or "."
+    os.makedirs(out_dir, exist_ok=True)
+
+    with wad3.WadFile(out_path, "w") as wad_file:
+        for file_path in in_paths:
+            if file_path.endswith(".png"):
+                try:
+                    img = Image.open(file_path).convert("RGB")
+
+                    name = os.path.basename(file_path).split(".")[0]
+
+                    img_quantized = img.quantize(colors=256)
+
+                    # convert to 768 bytes (256 RGB colors)
+                    palette_list = img_quantized.getpalette() or []
+                    if len(palette_list) < 768:
+                        palette_list = palette_list + [0] * (768 - len(palette_list))
+                    palette_bytes = bytes(palette_list[:768])
+
+                    palette_image = Image.new("P", (16, 16))
+                    palette_image.putpalette(palette_bytes)
+
+                    mip = wad3.Miptexture(name, img.width, img.height)
+                    mip.pixels = b""
+                    mip.palette = palette_bytes
+
+                    offset = 40
+                    offsets = [offset]
+                    for i in range(4):
+                        resized = img.resize(
+                            (img.width // pow(2, i), img.height // pow(2, i))
+                        )
+                        resized_quantized = resized.quantize(palette=palette_image)
+                        mip.pixels += resized_quantized.tobytes()
+                        if i < 3:
+                            offset += resized.width * resized.height
+                            offsets.append(offset)
+                    mip.offsets = tuple(offsets)
+
+                    buff = BytesIO()
+                    wad3.Miptexture.write(buff, mip)
+                    buff.seek(0)
+                    buff_size = buff.getbuffer().nbytes
+
+                    info = wad3.WadInfo(name)
+                    info.file_size = buff_size
+                    info.disk_size = buff_size
+                    info.compression = wad3.CompressionType.NONE
+                    info.type = wad3.LumpType.MIPTEX
+
+                    print(f"Adding: {file_path}")
+
+                    wad_file.writestr(info, buff)
 
                 except Exception as e:
                     print(f"Error processing {file_path}: {e}")
