@@ -20,42 +20,29 @@ class WadIconProvider(QFileIconProvider):
             "HL": QPixmap(":/games/hl1-32x32.png"),
         }
 
-    def icon(self, fileInfo: QFileInfo):
-        """
-        Overrides the default icon implementation.
+    def icon(self, fileInfo):
+        if isinstance(fileInfo, QFileInfo):
+            if fileInfo.isFile() and fileInfo.suffix().lower() == "wad":
+                wad_type = get_wad_type(fileInfo.filePath())
 
-        Args:
-            fileInfo (QFileInfo): Information about the file.
+                if wad_type and wad_type in self.WAD_ICONS:
+                    default_icon = super().icon(QFileIconProvider.File)
+                    pixmap = default_icon.pixmap(32, 32)
 
-        Returns:
-            QIcon: The new icon for the file.
-        """
-        if fileInfo.isFile() and fileInfo.suffix().lower() == "wad":
-            wad_type = get_wad_type(fileInfo.filePath())
+                    overlay_pixmap = self.WAD_ICONS.get(wad_type)
 
-            if wad_type and wad_type in self.WAD_ICONS:
-                # get the default icon
-                default_icon = super().icon(QFileIconProvider.File)
-                pixmap = default_icon.pixmap(32, 32)
+                    if overlay_pixmap:
+                        painter = QPainter(pixmap)
+                        try:
+                            overlay_scaled = overlay_pixmap.scaled(20, 20)
+                            painter.drawPixmap(
+                                pixmap.width() - overlay_scaled.width(),
+                                pixmap.height() - overlay_scaled.height(),
+                                overlay_scaled,
+                            )
+                        finally:
+                            painter.end()
 
-                # get overlay icon
-                overlay_pixmap = self.WAD_ICONS.get(wad_type)
+                    return QIcon(pixmap)
 
-                if overlay_pixmap:
-                    # create a painter to compose the icons
-                    painter = QPainter(pixmap)
-                    try:
-                        # scale and draw the overlay
-                        overlay_scaled = overlay_pixmap.scaled(20, 20)
-                        painter.drawPixmap(
-                            pixmap.width() - overlay_scaled.width(),
-                            pixmap.height() - overlay_scaled.height(),
-                            overlay_scaled,
-                        )
-                    finally:
-                        painter.end()
-
-                return QIcon(pixmap)
-
-        # fallback to the default implementation
         return super().icon(fileInfo)

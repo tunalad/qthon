@@ -1,6 +1,6 @@
 import subprocess
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 try:
     subprocess.check_output(["git", "describe", "--tags"], stderr=subprocess.DEVNULL)
