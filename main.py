@@ -362,7 +362,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
 
     def adjust_zoom(self, zoom_type):
         try:
-            if zoom_type == "in" and self.texture_size < 128:
+            if zoom_type == "in" and self.texture_size < 256:
                 self.texture_size += 16
             elif zoom_type == "out" and self.texture_size > 16:
                 self.texture_size -= 16
@@ -372,6 +372,17 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
             self.lw_textures.setIconSize(
                 QtCore.QSize(self.texture_size, self.texture_size)
             )
+
+            for i in range(self.lw_textures.count()):
+                item = self.lw_textures.item(i)
+                original_path = item.data(QtCore.Qt.UserRole)
+                if original_path:
+                    scaled_pixmap = QtGui.QPixmap(original_path).scaled(
+                        self.texture_size,
+                        self.texture_size,
+                        QtCore.Qt.KeepAspectRatio,
+                    )
+                    item.setIcon(QtGui.QIcon(scaled_pixmap))
         except Exception as e:
             error(f"[adjust_zoom] {e}")
 
