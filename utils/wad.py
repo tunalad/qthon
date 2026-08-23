@@ -5,7 +5,7 @@ import os, sys
 
 from io import BytesIO
 from array import array
-from struct import unpack
+from struct import unpack, unpack_from
 
 from PIL import Image
 
@@ -13,7 +13,9 @@ from vgio import quake
 from vgio import halflife
 from vgio.quake import lmp
 from vgio.quake import wad as wad2
+from vgio.quake import bsp as quake_bsp
 from vgio.halflife import wad as wad3
+from vgio.halflife import bsp as hl_bsp
 
 
 def unwad(wad_path, temp_dir):
@@ -105,6 +107,102 @@ def unwad(wad_path, temp_dir):
                     wad_file.extract(filename, temp_dir)
             except Exception as e:
                 print(f"Error: {e}", file=sys.stderr)
+
+    return temp_dir, texture_names
+
+
+def unbsp(bsp_path, temp_dir):
+    """
+    Extracts embedded textures of a BSP map to PNG files and returns texture names.
+
+    Args:
+        bsp_path (str): Path to the BSP map file.
+        temp_dir (str): Path to the TEMP folder, where we extract the textures.
+
+    Returns:
+        tuple: A tuple containing the path to the temporary directory where contents are extracted
+               and a list of texture names extracted from the map.
+
+    Notes:
+        - Supports Quake (bsp29/BSP2) and Half-Life (bsp30) maps.
+        - Textures only stored in external WADs are skipped.
+    """
+
+    if hl_bsp.is_bspfile(bsp_path):
+        is_hl_bsp = True
+    elif quake_bsp.is_bspfile(bsp_path):
+        is_hl_bsp = False
+    else:
+        raise ValueError(f"Invalid BSP file: {bsp_path}")
+
+    with open(bsp_path, "rb") as f:
+        data = f.read()
+
+    # both formats share the same header layout: version + 15 lumps, textures at index 2
+    lumps = [unpack("<2i", data[4 + i * 8 : 4 + (i + 1) * 8]) for i in range(15)]
+    lump_offset, lump_length = lumps[2]
+
+    count = unpack("<i", data[lump_offset : lump_offset + 4])[0]
+    mip_offsets = unpack(
+        f"<{count}i", data[lump_offset + 4 : lump_offset + 4 + count * 4]
+    )
+
+    texture_names = []
+
+    for mip_offset in mip_offsets:
+        try:
+            # skip external references (offset 0 or -1)
+            if mip_offset <= 0 or mip_offset > lump_length:
+                continue
+
+            base = lump_offset + mip_offset
+
+            name = data[base : base + 16].split(b"\x00")[0].decode("ascii", "replace")
+            width, height = unpack_from("<2i", data, base + 16)
+
+            # skip empty or non-embedded textures
+            if not name or min(width, height) < 1:
+                continue
+
+            offsets = unpack_from("<4I", data, base + 24)
+            if not any(offsets):
+                continue
+
+            pixel_size = width * height * 85 // 64
+            pixels = data[base + 40 : base + 40 + pixel_size]
+            if len(pixels) < pixel_size:
+                continue
+
+            # hl textures have their own palette after the mip levels
+            palette = []
+            if is_hl_bsp:
+                pal_size_pos = base + 40 + pixel_size
+                pal_count = unpack_from("<H", data, pal_size_pos)[0]
+                raw_palette = data[pal_size_pos + 2 : pal_size_pos + 2 + pal_count * 3]
+                palette += list(unpack(f"<{pal_count * 3}B", raw_palette))
+                palette += [0] * (768 - len(palette))
+            else:
+                for p in quake.palette:
+                    palette += p
+
+            img = Image.frombuffer("P", (width, height), pixels, "raw", "P", 0, 1)
+            img.putpalette(palette)
+
+            # dealing with duplicate names
+            fullpath_ext = os.path.join(temp_dir, f"{name}.png")
+            dup_index = 1
+            while os.path.exists(fullpath_ext):
+                fullpath_ext = os.path.join(temp_dir, f"{name} ({dup_index}).png")
+                dup_index += 1
+
+            img.save(fullpath_ext)
+            texture_names.append(os.path.splitext(os.path.basename(fullpath_ext))[0])
+        except Exception as e:
+            print(
+                f"Failed to extract texture from {os.path.basename(bsp_path)}: {e}",
+                file=sys.stderr,
+            )
+            continue
 
     return temp_dir, texture_names
 

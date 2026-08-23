@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import (
 
 from utils.wad import (
     unwad,
+    unbsp,
     wadup,
     wadup_hl,
     import_texture,
@@ -158,6 +159,24 @@ class FileMixin:
         except Exception as e:
             print(f"[import_wad] {e}")
 
+    def import_bsp(self, bsp_paths):
+        """
+        Imports embedded textures from multiple BSP map files.
+
+        Args:
+            bsp_paths (list): List of paths to BSP files.
+        """
+        try:
+            if len(bsp_paths) < 1:
+                return
+
+            for bsp in bsp_paths:
+                self.unpack_bsp(bsp)
+
+            self.history.new_change(self.get_list_state())
+        except Exception as e:
+            print(f"[import_bsp] {e}")
+
     def import_image(self, images):
         """
         Imports image files as textures.
@@ -204,7 +223,7 @@ class FileMixin:
                 dialog.setIconProvider(WadIconProvider())
                 dialog.setFileMode(QFileDialog.ExistingFiles)
                 dialog.setNameFilter(
-                    "WAD Files (*.wad);;Images (*.png *.jpg *.jpeg);;All files (*)"
+                    "WAD Files (*.wad);;BSP Maps (*.bsp);;Images (*.png *.jpg *.jpeg);;All files (*)"
                 )
                 if dialog.exec_():
                     import_paths = dialog.selectedFiles()
@@ -213,17 +232,21 @@ class FileMixin:
 
             wad_paths = []
             image_paths = []
+            bsp_paths = []
             extra_paths = []
 
             for path in import_paths:
                 if path.lower().endswith(".wad"):
                     wad_paths.append(path)
+                elif path.lower().endswith(".bsp"):
+                    bsp_paths.append(path)
                 elif path.lower().endswith((".png", ".jpg", ".jpeg")):
                     image_paths.append(path)
                 else:
                     extra_paths.append(path)
 
             self.import_wad(wad_paths)
+            self.import_bsp(bsp_paths)
             self.import_image(image_paths)
 
             if len(extra_paths) > 0:
@@ -321,3 +344,37 @@ class FileMixin:
                 self.lw_textures.addItem(item)
         except Exception as e:
             print(f"[unpack_wad] {e}")
+
+    def unpack_bsp(self, path):
+        """
+        Extracts embedded textures from BSP map file and adds them to texture list.
+
+        Args:
+            path (str): Path to BSP map to unpack.
+        """
+        try:
+            unbspped = unbsp(path, self.temp_dir)
+            temp_dir = unbspped[0]
+            textures = unbspped[1]
+
+            if len(textures) < 1:
+                QMessageBox.warning(
+                    self,
+                    "Qthon Warning",
+                    "This map doesn't have any embedded textures.",
+                )
+                return
+
+            for t in textures:
+                scaled_pixmap = QtGui.QPixmap(f"{temp_dir}/{t}.png").scaled(
+                    self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
+                )
+
+                scaled_icon = QtGui.QIcon(scaled_pixmap)
+                item = QListWidgetItem(scaled_icon, str(t))
+
+                item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}.png")  # icon path
+
+                self.lw_textures.addItem(item)
+        except Exception as e:
+            print(f"[unpack_bsp] {e}")
