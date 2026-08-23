@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
 )
 
 from utils import path
+from utils.textures import save_temp_texture
 
 
 class ResizeWindow(QDialog):
@@ -42,6 +43,6 @@ class ResizeWindow(QDialog):
             img = Image.open(t["path"])
             resized = img.resize((self.sb_X.value(), self.sb_Y.value()))
 
-            resized.save(t["path"])
+            save_temp_texture(resized, t["path"])
 
         self.accept()

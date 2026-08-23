@@ -164,8 +164,12 @@ class History:
                     filename = os.path.basename(file_path)
                     # destination path for the copied file in the snapshot directory
                     dest_path = os.path.join(snap_dir, filename)
-                    # copy the file to the snapshot directory
-                    shutil.copy(file_path, dest_path)
+                    # hard link if possible (faster)
+                    # fall back to copying on filesystems that don't allow it
+                    try:
+                        os.link(file_path, dest_path)
+                    except OSError:
+                        shutil.copy(file_path, dest_path)
         except Exception as e:
             print(f"[History/take_snapshot] {e}")
 
@@ -188,7 +192,6 @@ class History:
             for filename in os.listdir(self.temp_dir):
                 file_path = os.path.join(self.temp_dir, filename)
                 if os.path.isfile(file_path) and filename != "snapshots":
-                    print(file_path)
                     os.remove(file_path)
 
             # copy shyt

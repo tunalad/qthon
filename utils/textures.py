@@ -40,15 +40,23 @@ def save_temp_texture(img, path):
     """
     Saves a working texture file using the app's scratch format.
 
+    Writes to a temp file and atomically replaces the target so that
+    hard-linked history snapshots keep pointing at the old data instead
+    of being modified in place.
+
     Args:
         img (Image): PIL image to save.
         path (str): Destination path.
     """
+    tmp_path = f"{path}.tmp"
+
     # liquids must stay png for the chromium's liquid preview window
     if os.path.basename(path).startswith("*"):
-        img.save(path, format="PNG", compress_level=0)
+        img.save(tmp_path, format="PNG", compress_level=0)
     else:
-        img.save(path, **_TEMP_IMAGE_KWARGS)
+        img.save(tmp_path, **_TEMP_IMAGE_KWARGS)
+
+    os.replace(tmp_path, path)
 
 
 def flip_texture(texture_path, mirror=False):
