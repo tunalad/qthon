@@ -12,9 +12,8 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 
+from utils.textures import flip_texture, rotate_texture, temp_texture_path
 from utils.wad import (
-    flip_texture,
-    rotate_texture,
     defullbright,
 )
 
@@ -280,12 +279,11 @@ class EditMixin:
                     )
                     return
 
-                os.rename(item["path"], f"{self.temp_dir}/{new_name}.png")
+                new_path = temp_texture_path(self.temp_dir, new_name)
+                os.rename(item["path"], new_path)
 
                 selected_items[0].setText(new_name)
-                selected_items[0].setData(
-                    QtCore.Qt.UserRole, f"{self.temp_dir}/{new_name}.png"
-                )
+                selected_items[0].setData(QtCore.Qt.UserRole, new_path)
                 self.history.new_change(self.get_list_state())
         except Exception as e:
             error(f"[rename_texture] {e}")

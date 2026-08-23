@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (
     QAction,
 )
 
+from utils.textures import temp_texture_path
 from utils.wad import (
     unwad,
     unbsp,
@@ -332,14 +333,16 @@ class FileMixin:
             textures = unwadded[1]
 
             for t in textures:
-                scaled_pixmap = QtGui.QPixmap(f"{temp_dir}/{t}").scaled(
+                texture_path = temp_texture_path(temp_dir, t)
+
+                scaled_pixmap = QtGui.QPixmap(texture_path).scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                 )
 
                 scaled_icon = QtGui.QIcon(scaled_pixmap)
                 item = QListWidgetItem(scaled_icon, str(t))
 
-                item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}.png")  # icon path
+                item.setData(QtCore.Qt.UserRole, texture_path)  # icon path
 
                 self.lw_textures.addItem(item)
         except Exception as e:
@@ -366,14 +369,16 @@ class FileMixin:
                 return
 
             for t in textures:
-                scaled_pixmap = QtGui.QPixmap(f"{temp_dir}/{t}.png").scaled(
+                texture_path = temp_texture_path(temp_dir, t)
+
+                scaled_pixmap = QtGui.QPixmap(texture_path).scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                 )
 
                 scaled_icon = QtGui.QIcon(scaled_pixmap)
                 item = QListWidgetItem(scaled_icon, str(t))
 
-                item.setData(QtCore.Qt.UserRole, f"{temp_dir}/{t}.png")  # icon path
+                item.setData(QtCore.Qt.UserRole, texture_path)  # icon path
 
                 self.lw_textures.addItem(item)
         except Exception as e:

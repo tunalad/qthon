@@ -17,6 +17,13 @@ from vgio.quake import bsp as quake_bsp
 from vgio.halflife import wad as wad3
 from vgio.halflife import bsp as hl_bsp
 
+from utils.textures import (
+    TEMP_IMAGE_EXT,
+    quake_palette,
+    save_temp_texture,
+    temp_texture_path,
+)
+
 
 def unwad(wad_path, temp_dir):
     """
@@ -46,27 +53,23 @@ def unwad(wad_path, temp_dir):
     texture_names = []
 
     # flatten out palette
-    palette = []
-    for p in quake.palette:
-        palette += p
+    palette = quake_palette()
 
     with wad.WadFile(wad_path) as wad_file:
         for item in wad_file.infolist():
             filename = item.filename
-            fullpath = os.path.join(temp_dir, filename)
-            fullpath_ext = "{0}.png".format(fullpath)
 
             # check if duplicate
+            name = filename
             count = 1
-            while os.path.exists(fullpath_ext):
-                # append suffix
-                filename, ext = os.path.splitext(filename)
-                fullpath_ext = f"{os.path.join(temp_dir, filename)} ({count}){ext}"
-                fullpath_ext = "{0}.png".format(fullpath_ext)  # Update fullpath_ext
+            while os.path.exists(temp_texture_path(temp_dir, name)):
+                name = f"{filename} ({count})"
                 count += 1
 
+            fullpath_ext = temp_texture_path(temp_dir, name)
+
             # add texture name to the list
-            texture_names.append(os.path.splitext(os.path.basename(fullpath_ext))[0])
+            texture_names.append(name)
 
             data = None
             size = None
@@ -91,9 +94,7 @@ def unwad(wad_path, temp_dir):
                         if is_wad3 and mip.palette:
                             palette = list(mip.palette)
                         else:
-                            palette = []
-                            for p in quake.palette:
-                                palette += p
+                            palette = quake_palette()
                 except Exception as e:
                     print(f"Failed to extract resource: {filename}", file=sys.stderr)
                     continue
@@ -102,7 +103,7 @@ def unwad(wad_path, temp_dir):
                 if data is not None and size is not None:
                     img = Image.frombuffer("P", size, data, "raw", "P", 0, 1)
                     img.putpalette(palette)
-                    img.save(fullpath_ext, compress_level=0)
+                    save_temp_texture(img, fullpath_ext)
                 else:
                     wad_file.extract(filename, temp_dir)
             except Exception as e:
@@ -182,21 +183,20 @@ def unbsp(bsp_path, temp_dir):
                 palette += list(unpack(f"<{pal_count * 3}B", raw_palette))
                 palette += [0] * (768 - len(palette))
             else:
-                for p in quake.palette:
-                    palette += p
+                palette = quake_palette()
 
             img = Image.frombuffer("P", (width, height), pixels, "raw", "P", 0, 1)
             img.putpalette(palette)
 
             # dealing with duplicate names
-            fullpath_ext = os.path.join(temp_dir, f"{name}.png")
+            unique_name = name
             dup_index = 1
-            while os.path.exists(fullpath_ext):
-                fullpath_ext = os.path.join(temp_dir, f"{name} ({dup_index}).png")
+            while os.path.exists(temp_texture_path(temp_dir, unique_name)):
+                unique_name = f"{name} ({dup_index})"
                 dup_index += 1
 
-            img.save(fullpath_ext, compress_level=0)
-            texture_names.append(os.path.splitext(os.path.basename(fullpath_ext))[0])
+            save_temp_texture(img, temp_texture_path(temp_dir, unique_name))
+            texture_names.append(unique_name)
         except Exception as e:
             print(
                 f"Failed to extract texture from {os.path.basename(bsp_path)}: {e}",
@@ -228,9 +228,7 @@ def wadup(in_paths, out_path):
     os.makedirs(out_dir, exist_ok=True)
 
     # making the palette
-    palette = []
-    for p in quake.palette:
-        palette += p
+    palette = quake_palette()
 
     palette_image = Image.frombytes("P", (16, 16), bytes(palette))
     palette_image.putpalette(palette)
@@ -238,7 +236,7 @@ def wadup(in_paths, out_path):
     # making the WAD itself
     with wad.WadFile(out_path, "w") as wad_file:
         for file_path in in_paths:
-            if file_path.endswith(".png"):
+            if file_path.endswith(TEMP_IMAGE_EXT):
                 try:
                     # process the image
                     with Image.open(file_path).convert(mode="RGB") as img:
@@ -299,7 +297,7 @@ def wadup_hl(in_paths, out_path):
 
     with wad3.WadFile(out_path, "w") as wad_file:
         for file_path in in_paths:
-            if file_path.endswith(".png"):
+            if file_path.endswith(TEMP_IMAGE_EXT):
                 try:
                     img = Image.open(file_path).convert("RGB")
 
@@ -352,48 +350,6 @@ def wadup_hl(in_paths, out_path):
                     print(f"Error processing {file_path}: {e}")
 
 
-def flip_texture(texture_path, mirror=False):
-    """
-    Flips a texture image either horizontally or vertically.
-
-    Args:
-        texture_path (str): Path to the texture image file.
-        mirror (bool, optional): If True, flips horizontally. If False, flips vertically. Defaults to False.
-    """
-    img = Image.open(texture_path)
-
-    if mirror:
-        flipped = img.transpose(Image.FLIP_LEFT_RIGHT)
-    else:
-        flipped = img.transpose(Image.FLIP_TOP_BOTTOM)
-
-    flipped.save(texture_path)
-
-    flipped.close()
-    img.close()
-
-
-def rotate_texture(texture_path, to_right=False):
-    """
-    Rotates a texture image 90 degrees clockwise or counterclockwise.
-
-    Args:
-        texture_path (str): Path to the texture image file.
-        to_right (bool, optional): If True, rotates 90° clockwise. If False, rotates 90° counterclockwise. Defaults to False.
-    """
-    img = Image.open(texture_path)
-
-    if to_right:
-        rotated = img.rotate(-90)
-    else:
-        rotated = img.rotate(90)
-
-    rotated.save(texture_path)
-
-    rotated.close()
-    img.close()
-
-
 def import_texture(images, temp_dir):
     """
     Processes and imports texture images with Quake palette constraints.
@@ -415,9 +371,7 @@ def import_texture(images, temp_dir):
     has_alpha = False
 
     # quake palette
-    palette = []
-    for p in quake.palette:
-        palette += p
+    palette = quake_palette()
 
     palette_image = Image.frombytes("P", (16, 16), bytes(palette))
     palette_image.putpalette(palette)
@@ -468,13 +422,13 @@ def import_texture(images, temp_dir):
 
         # dealing with duplicate names
         index = 1
-        new_path = f"{temp_dir}/{base_name}.png"
+        new_path = temp_texture_path(temp_dir, base_name)
         while os.path.exists(new_path):
-            new_path = f"{temp_dir}/{base_name} ({index}).png"
+            new_path = temp_texture_path(temp_dir, f"{base_name} ({index})")
             index += 1
 
         # save image
-        img.save(new_path, format="PNG")
+        save_temp_texture(img, new_path)
         img.close()
         new_paths.append(new_path)
     return new_paths
@@ -497,9 +451,7 @@ def defullbright(images, overwrite=False):
     """
 
     # quake palette
-    full_palette = []
-    for p in quake.palette:
-        full_palette += p
+    full_palette = quake_palette()
 
     # removed fullbrights
     reduced_palette = full_palette[: 224 * 3] + full_palette[-3:]
@@ -514,13 +466,14 @@ def defullbright(images, overwrite=False):
         img = Image.open(img_path).convert("RGB")
         img = img.quantize(palette=palette_image)
 
-        base_name, ext = os.path.splitext(os.path.basename(img_path))
+        base_name = os.path.splitext(os.path.basename(img_path))[0]
+        img_dir = os.path.dirname(img_path)
 
         # overwrite
         if overwrite:
-            new_path = os.path.join(os.path.dirname(img_path), f"{base_name}{ext}")
+            new_path = img_path
         else:
-            new_path = os.path.join(os.path.dirname(img_path), f"{base_name}-dfb{ext}")
+            new_path = temp_texture_path(img_dir, f"{base_name}-dfb")
 
         # dealing with duplicate names
         index = 1
@@ -528,32 +481,16 @@ def defullbright(images, overwrite=False):
             if overwrite:
                 break
 
-            new_path = os.path.join(
-                os.path.dirname(img_path), f"{base_name}-dfb ({index}).png"
-            )
+            new_path = temp_texture_path(img_dir, f"{base_name}-dfb ({index})")
             index += 1
 
-        img.save(new_path, format="PNG")
+        save_temp_texture(img, new_path)
         img.close()
 
         if not overwrite:
             new_paths.append(new_path)
 
     return new_paths
-
-
-def get_texture_size(image_path):
-    """
-    Returns the dimensions of a texture image.
-
-    Args:
-        image_path (str): Path to the texture image file.
-
-    Returns:
-        tuple: Width and height of the image in pixels.
-    """
-    with Image.open(image_path) as img:
-        return img.size
 
 
 def get_wad_type(file_path):
