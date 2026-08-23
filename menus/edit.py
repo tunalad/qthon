@@ -12,7 +12,12 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 
-from utils.textures import flip_texture, rotate_texture, temp_texture_path
+from utils.textures import (
+    flip_texture,
+    load_pixmap,
+    rotate_texture,
+    temp_texture_path,
+)
 from utils.wad import (
     defullbright,
 )
@@ -198,7 +203,7 @@ class EditMixin:
                 else:  # to left
                     rotate_texture(icon_path, False)
 
-                original_pixmap = QtGui.QPixmap(icon_path)
+                original_pixmap = load_pixmap(icon_path)
                 scaled_pixmap = original_pixmap.scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                 )
@@ -232,7 +237,7 @@ class EditMixin:
             for t in dfb_textures:
                 filename = os.path.splitext(os.path.basename(t))[0]
 
-                scaled_pixmap = QtGui.QPixmap(t).scaled(
+                scaled_pixmap = load_pixmap(t).scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                 )
 
@@ -335,7 +340,7 @@ class EditMixin:
                 else:  # vertically (flipped)
                     flip_texture(icon_path, False)
 
-                original_pixmap = QtGui.QPixmap(icon_path)
+                original_pixmap = load_pixmap(icon_path)
                 scaled_pixmap = original_pixmap.scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                 )

@@ -2,6 +2,7 @@
 import os
 
 from PIL import Image
+from PyQt5.QtGui import QPixmap
 
 from vgio import quake
 
@@ -34,6 +35,26 @@ def temp_texture_path(temp_dir, name):
         str: Full path of the working texture file.
     """
     return os.path.join(temp_dir, f"{name}{TEMP_IMAGE_EXT}")
+
+
+def load_pixmap(path):
+    """
+    Loads a QPixmap fresh from disk.
+
+    QPixmap(path) caches by filename and keeps serving stale pixels after a
+    working file gets overwritten in place, so the bytes are read explicitly
+    and decoded from memory instead.
+
+    Args:
+        path (str): Path to the texture image file.
+
+    Returns:
+        QPixmap: Decoded pixmap reflecting the current file contents.
+    """
+    with open(path, "rb") as f:
+        pixmap = QPixmap()
+        pixmap.loadFromData(f.read())
+    return pixmap
 
 
 def save_temp_texture(img, path):

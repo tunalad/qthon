@@ -26,7 +26,7 @@ from PyQt5.QtWidgets import (
 )
 
 from utils import history, settings, path
-from utils.textures import get_texture_size
+from utils.textures import get_texture_size, load_pixmap
 from menus.file import FileMixin
 from menus.edit import EditMixin
 from menus.view import ViewMixin
@@ -377,7 +377,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
                 item = self.lw_textures.item(i)
                 original_path = item.data(QtCore.Qt.UserRole)
                 if original_path:
-                    scaled_pixmap = QtGui.QPixmap(original_path).scaled(
+                    scaled_pixmap = load_pixmap(original_path).scaled(
                         self.texture_size,
                         self.texture_size,
                         QtCore.Qt.KeepAspectRatio,
@@ -469,7 +469,7 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
             # append items based on state
             textures = self.history.state[self.history.position - 1]["list-state"]
             for t in textures:
-                scaled_pixmap = QtGui.QPixmap(f"{t['path']}").scaled(
+                scaled_pixmap = load_pixmap(t["path"]).scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                 )
 

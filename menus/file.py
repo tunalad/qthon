@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
     QAction,
 )
 
-from utils.textures import temp_texture_path
+from utils.textures import load_pixmap, temp_texture_path
 from utils.wad import (
     unwad,
     unbsp,
@@ -192,7 +192,7 @@ class FileMixin:
                 return
 
             for t in textures:
-                scaled_pixmap = QtGui.QPixmap(t).scaled(
+                scaled_pixmap = load_pixmap(t).scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                 )
 
@@ -335,7 +335,7 @@ class FileMixin:
             for t in textures:
                 texture_path = temp_texture_path(temp_dir, t)
 
-                scaled_pixmap = QtGui.QPixmap(texture_path).scaled(
+                scaled_pixmap = load_pixmap(texture_path).scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                 )
 
@@ -371,7 +371,7 @@ class FileMixin:
             for t in textures:
                 texture_path = temp_texture_path(temp_dir, t)
 
-                scaled_pixmap = QtGui.QPixmap(texture_path).scaled(
+                scaled_pixmap = load_pixmap(texture_path).scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
                 )
 
