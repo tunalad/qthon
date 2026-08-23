@@ -102,7 +102,7 @@ def unwad(wad_path, temp_dir):
                 if data is not None and size is not None:
                     img = Image.frombuffer("P", size, data, "raw", "P", 0, 1)
                     img.putpalette(palette)
-                    img.save(fullpath_ext)
+                    img.save(fullpath_ext, compress_level=0)
                 else:
                     wad_file.extract(filename, temp_dir)
             except Exception as e:
@@ -195,7 +195,7 @@ def unbsp(bsp_path, temp_dir):
                 fullpath_ext = os.path.join(temp_dir, f"{name} ({dup_index}).png")
                 dup_index += 1
 
-            img.save(fullpath_ext)
+            img.save(fullpath_ext, compress_level=0)
             texture_names.append(os.path.splitext(os.path.basename(fullpath_ext))[0])
         except Exception as e:
             print(
