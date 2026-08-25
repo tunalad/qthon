@@ -16,7 +16,7 @@ def create_venv(venv_dir):
 def install_deps():
     print("Installing dependencies...")
     subprocess.run([
-        sys.executable, "-m", "pip", "install", "--upgrade", "pip",
+        "venv_build/bin/python", "-m", "pip", "install", "--upgrade", "pip",
         "pyinstaller", "-r", "requirements.txt"
     ])
 
@@ -33,7 +33,7 @@ def build():
     with open("version_build.py", "w") as f:
         f.write(f'__version__ = "{__version__}"\n')
 
-    subprocess.run([sys.executable, "-m", "PyInstaller", "qthon.spec"])
+    subprocess.run(["venv_build/bin/pyinstaller", "--noconfirm", "qthon.spec"])
 
     if os.path.exists("version_build.py"):
         os.remove("version_build.py")
