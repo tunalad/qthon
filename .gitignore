@@ -2,5 +2,7 @@ venv
 __pycache__
 build
 dist
-venv_build
 version_build.py
+assets/ui/resource_ui.py
+venv_build
+venv_build_win/
