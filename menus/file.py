@@ -331,9 +331,16 @@ class FileMixin:
             unwadded = unwad(path, self.temp_dir)
             temp_dir = unwadded[0]
             textures = unwadded[1]
+        except Exception as e:
+            print(f"[unpack_wad] {e}")
+            return
 
-            for t in textures:
+        for t in textures:
+            try:
                 texture_path = temp_texture_path(temp_dir, t)
+
+                if not os.path.exists(texture_path):
+                    continue
 
                 scaled_pixmap = load_pixmap(texture_path).scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
@@ -345,8 +352,8 @@ class FileMixin:
                 item.setData(QtCore.Qt.UserRole, texture_path)  # icon path
 
                 self.lw_textures.addItem(item)
-        except Exception as e:
-            print(f"[unpack_wad] {e}")
+            except Exception as e:
+                print(f"[unpack_wad] skipping {t}: {e}")
 
     def unpack_bsp(self, path):
         """
@@ -359,17 +366,24 @@ class FileMixin:
             unbspped = unbsp(path, self.temp_dir)
             temp_dir = unbspped[0]
             textures = unbspped[1]
+        except Exception as e:
+            print(f"[unpack_bsp] {e}")
+            return
 
-            if len(textures) < 1:
-                QMessageBox.warning(
-                    self,
-                    "Qthon Warning",
-                    "This map doesn't have any embedded textures.",
-                )
-                return
+        if len(textures) < 1:
+            QMessageBox.warning(
+                self,
+                "Qthon Warning",
+                "This map doesn't have any embedded textures.",
+            )
+            return
 
-            for t in textures:
+        for t in textures:
+            try:
                 texture_path = temp_texture_path(temp_dir, t)
+
+                if not os.path.exists(texture_path):
+                    continue
 
                 scaled_pixmap = load_pixmap(texture_path).scaled(
                     self.texture_size, self.texture_size, QtCore.Qt.KeepAspectRatio
@@ -381,5 +395,5 @@ class FileMixin:
                 item.setData(QtCore.Qt.UserRole, texture_path)  # icon path
 
                 self.lw_textures.addItem(item)
-        except Exception as e:
-            print(f"[unpack_bsp] {e}")
+            except Exception as e:
+                print(f"[unpack_bsp] skipping {t}: {e}")

@@ -45,8 +45,6 @@ def unwad(wad_path, temp_dir):
         wad = wad3
         is_wad3 = True
 
-    print(wad.WadInfo(wad_path).compression)
-
     if not wad.is_wadfile(wad_path):
         raise ValueError(f"Invalid WAD file: {wad_path}")
 
@@ -59,27 +57,19 @@ def unwad(wad_path, temp_dir):
         for item in wad_file.infolist():
             filename = item.filename
 
-            # check if duplicate
-            name = filename
-            count = 1
-            while os.path.exists(temp_texture_path(temp_dir, name)):
-                name = f"{filename} ({count})"
-                count += 1
-
-            fullpath_ext = temp_texture_path(temp_dir, name)
-
-            # add texture name to the list
-            texture_names.append(name)
-
             data = None
             size = None
 
             # pictures
             if item.type == wad.LumpType.QPIC:
-                with wad_file.open(filename) as lmp_file:
-                    lump = lmp.Lmp.open(lmp_file)
-                    size = lump.width, lump.height
-                    data = array("B", lump.pixels)
+                try:
+                    with wad_file.open(filename) as lmp_file:
+                        lump = lmp.Lmp.open(lmp_file)
+                        size = lump.width, lump.height
+                        data = array("B", lump.pixels)
+                except Exception as e:
+                    print(f"Failed to extract resource: {filename}", file=sys.stderr)
+                    continue
 
             # special cases
             elif item.type == wad.LumpType.MIPTEX:
@@ -98,14 +88,32 @@ def unwad(wad_path, temp_dir):
                 except Exception as e:
                     print(f"Failed to extract resource: {filename}", file=sys.stderr)
                     continue
+
+            # anything else isn't a texture; still extract it so nothing is lost,
+            # but don't report it as one of the WAD's textures
+            else:
+                try:
+                    wad_file.extract(filename, temp_dir)
+                except Exception as e:
+                    print(f"Error: {e}", file=sys.stderr)
+                continue
+
+            # check if duplicate
+            name = filename
+            count = 1
+            while os.path.exists(temp_texture_path(temp_dir, name)):
+                name = f"{filename} ({count})"
+                count += 1
+
+            fullpath_ext = temp_texture_path(temp_dir, name)
+
             try:
                 # convert to image file
-                if data is not None and size is not None:
-                    img = Image.frombuffer("P", size, data, "raw", "P", 0, 1)
-                    img.putpalette(palette)
-                    save_temp_texture(img, fullpath_ext)
-                else:
-                    wad_file.extract(filename, temp_dir)
+                img = Image.frombuffer("P", size, data, "raw", "P", 0, 1)
+                img.putpalette(palette)
+                save_temp_texture(img, fullpath_ext)
+                # add texture name to the list
+                texture_names.append(name)
             except Exception as e:
                 print(f"Error: {e}", file=sys.stderr)
 
