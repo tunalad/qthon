@@ -42,7 +42,7 @@
     <item>
      <widget class="QListWidget" name="lw_textures">
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(171, 171, 171);</string>
+       <string notr="true">background-color: rgb(171, 171, 171); color: black;</string>
       </property>
       <property name="autoScrollMargin">
        <number>32</number>

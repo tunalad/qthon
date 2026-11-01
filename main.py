@@ -248,7 +248,9 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
         try:
             if event.mimeData().hasUrls():
                 event.accept()
-                self.lw_textures.setStyleSheet("background-color: rgb(131, 131, 131);")
+                self.lw_textures.setStyleSheet(
+                    "background-color: rgb(131, 131, 131); color: black;"
+                )
             else:
                 event.ignore()
         except Exception as e:
@@ -256,7 +258,9 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
 
     def dragLeaveEvent(self):
         try:
-            self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
+            self.lw_textures.setStyleSheet(
+                "background-color: rgb(171, 171, 171); color: black;"
+            )
         except Exception as e:
             error(f"[dragLeaveEvent] {e}")
 
@@ -264,7 +268,9 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
         try:
             files = [url.toLocalFile() for url in event.mimeData().urls()]
             self.import_wads_images(dropped_files=files)
-            self.lw_textures.setStyleSheet("background-color: rgb(171, 171, 171);")
+            self.lw_textures.setStyleSheet(
+                "background-color: rgb(171, 171, 171); color: black;"
+            )
         except Exception as e:
             error(f"[dropEvent] {e}")
 
