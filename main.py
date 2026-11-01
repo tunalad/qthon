@@ -499,4 +499,12 @@ class MainWindow(QMainWindow, FileMixin, EditMixin, ViewMixin):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     UIWindow = MainWindow()
+
+    if len(sys.argv) > 1:
+        wad_arg = os.path.abspath(os.path.expanduser(sys.argv[1]))
+        if os.path.isfile(wad_arg):
+            UIWindow.open_wad(wad_arg)
+        else:
+            QMessageBox.warning(UIWindow, "Qthon Warning", f"File not found: {wad_arg}")
+
     app.exec_()
