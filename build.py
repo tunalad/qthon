@@ -36,7 +36,14 @@ def install_deps():
 
 def compile_resources():
     print("Compiling resources...")
-    subprocess.run(["pyrcc5", "assets/assets.qrc", "-o", "assets/ui/resource_ui.py"])
+    subprocess.run(
+        [
+            f"{VENV_DIR}/{BIN_DIR}/pyrcc5{EXE_SUFFIX}",
+            "assets/assets.qrc",
+            "-o",
+            "assets/ui/resource_ui.py",
+        ]
+    )
 
 
 def build():
